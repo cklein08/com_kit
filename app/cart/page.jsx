@@ -64,7 +64,14 @@ function CartPageLayout({ config, locale, children }) {
           <AuthBar />
         </div>
         {config ? <MainNav config={config} locale={locale} /> : null}
-        <main className="flex-1">{children}</main>
+        <main
+          className="flex-1"
+          data-aue-resource="urn:aemconnection:content/site/cart/jcr:content/data/master"
+          data-aue-type="container"
+          data-aue-label="Cart"
+        >
+          {children}
+        </main>
         <Footer />
       </div>
     </>

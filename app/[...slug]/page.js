@@ -14,7 +14,7 @@ import { ProductListPage } from "@/components/product-list-page/product-list-pag
 import { ProductDetail } from "@/components/product-detail/product-detail"
 import { AmplienceWrapper } from "@/components/amplience/wrapper"
 import { getProductWithVariants } from "@/lib/api/plp"
-import { UE_CORS_SCRIPT_URL } from "@/lib/constants"
+import { UE_CORS_SCRIPT_URL, URL_LOCALE_SEGMENTS, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants"
 
 export default function Page({ params }) {
   const resolvedParams = use(params)
@@ -41,20 +41,32 @@ export default function Page({ params }) {
     const storedAemEnv = localStorage.getItem('aemEnvironment');
     const storedProjectName = localStorage.getItem('projectName');
     const storedLocale = localStorage.getItem('locale') || 'en';
+    const isInUniversalEditor = window.self !== window.top;
+    const aemEnv = storedAemEnv || (isInUniversalEditor ? DEFAULT_AEM_EDITOR_URL : '');
+    const aemProject = storedProjectName || (isInUniversalEditor ? DEFAULT_AEM_PROJECT : '');
 
     setAemEnvironment(storedAemEnv || '');
     setProjectName(storedProjectName || '');
 
-    if (!storedAemEnv || !storedProjectName) {
-      setShowModal(true);
+    if (!aemEnv || !aemProject) {
+      if (!isInUniversalEditor) setShowModal(true);
       return;
     }
     setConfig({
-      env: storedAemEnv,
-      project: storedProjectName,
+      env: aemEnv,
+      project: aemProject,
     });
 
-    // Don't fetch screen content for product detail routes
+    // Don't fetch AEM screen for product detail routes; use minimal UE instrumentation so the page can be opened in Universal Editor.
+    if (isProductPath && productSlug) {
+      setContent(null);
+      setEditorProp({
+        'data-aue-resource': `urn:aemconnection:content/site/product/${productSlug}/jcr:content/data/master`,
+        'data-aue-type': 'container',
+        'data-aue-label': 'Product page',
+      });
+      return;
+    }
     if (isProductPath) {
       setContent(null);
       setEditorProp({});
@@ -63,7 +75,7 @@ export default function Page({ params }) {
 
     const randomNumber = Math.random().toString(36).substring(2, 15);
     const sdk = new AEMHeadless({
-      serviceURL: storedAemEnv,
+      serviceURL: aemEnv,
       endpoint: '/graphql/execute.json',
       fetch: ((resource, options = {}) => {
         if (resource.startsWith('https://author-'))
@@ -78,11 +90,29 @@ export default function Page({ params }) {
       slugSegments.length >= 5 &&
       slugSegments[0] === 'content' &&
       slugSegments[1] === 'dam' &&
-      slugSegments[2] === storedProjectName &&
+      slugSegments[2] === aemProject &&
       slugSegments[3] === 'site';
+
+    // Optional URL–locale mapping: if slug starts with a known locale (e.g. us/en), use it and treat the rest as content path.
+    let localeForPath = storedLocale;
+    let contentPathSegments = slugSegments;
+    if (!isFullAemPath && slugSegments.length >= 2) {
+      for (const segments of URL_LOCALE_SEGMENTS) {
+        const matches = segments.length <= slugSegments.length &&
+          segments.every((seg, i) => slugSegments[i] === seg);
+        if (matches) {
+          localeForPath = segments.join('/');
+          contentPathSegments = slugSegments.slice(segments.length);
+          if (contentPathSegments.length === 0) contentPathSegments = ['home', 'home'];
+          localStorage.setItem('locale', localeForPath);
+          break;
+        }
+      }
+    }
+
     const path = isFullAemPath
       ? `/${slugSegments.join('/')}`
-      : `/content/dam/${storedProjectName}/site/${storedLocale}/${slugSegments.join('/')}`;
+      : `/content/dam/${aemProject}/site/${localeForPath}/${contentPathSegments.join('/')}`;
 
     sdk.runPersistedQuery('v0/screenByPath', { path, variation: 'master', v1: randomNumber })
       .then(({ data }) => {

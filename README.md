@@ -37,6 +37,7 @@ AEM and Amplience coexist: same layout (MainNav, Footer, AuthBar), same product 
    - **Commerce**: `NEXT_PUBLIC_COMMERCE_OPTIMIZER_URL`, `NEXT_PUBLIC_CATALOG_VIEW_ID`
    - **Auth (Sign in with Adobe, same as AEM author)**: `ADOBE_CLIENT_ID`, `ADOBE_CLIENT_SECRET`, `AUTH_SECRET` (or `ADOBE_SESSION_SECRET`). Optional: `ADOBE_IMS_ORG_ID` to scope sign-in to an org.
    - **Amplience (Content Studio)**: `NEXT_PUBLIC_AMPLIENCE_HUB`, `NEXT_PUBLIC_APP_URL` — see [docs/amplience-content-studio.md](docs/amplience-content-studio.md) for visualization and toolbar setup.
+   - **Universal Editor (AEM)**: To open this app in Adobe Universal Editor when authors click Edit in AEM, configure the preview URL in AEM to point at this storefront. See [docs/universal-editor-aem-preview.md](docs/universal-editor-aem-preview.md). For local dev, use a tunnel (e.g. `npm run tunnel`) and the tunnel URL in UE—see [docs/universal-editor-tunnel.md](docs/universal-editor-tunnel.md).
    - Optional: content source (AEM, da.live) and related vars
 
 3. **Run locally**

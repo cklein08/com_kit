@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
-import { UE_CORS_SCRIPT_URL } from "@/lib/constants";
+import { UE_CORS_SCRIPT_URL, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
 
 
 export default function Component() {
@@ -41,18 +41,22 @@ export default function Component() {
     if (typeof window !== 'undefined') {
       const storedAemEnv = localStorage.getItem('aemEnvironment');
       const storedProjectName = localStorage.getItem('projectName');
+      const isInUniversalEditor = window.self !== window.top;
+
+      const aemEnv = storedAemEnv || (isInUniversalEditor ? DEFAULT_AEM_EDITOR_URL : '');
+      const aemProject = storedProjectName || (isInUniversalEditor ? DEFAULT_AEM_PROJECT : '');
 
       setAemEnvironment(storedAemEnv || '');
       setProjectName(storedProjectName || '');
 
-      if (!storedAemEnv || !storedProjectName) {
-        setShowModal(true);
+      if (!aemEnv || !aemProject) {
+        if (!isInUniversalEditor) setShowModal(true);
         setContentLoadAttempted(false);
         return;
       }
       setConfig({
-        env: storedAemEnv,
-        project: storedProjectName,
+        env: aemEnv,
+        project: aemProject,
       });
       setContent(null);
       setContentLoadAttempted(false);
@@ -60,7 +64,7 @@ export default function Component() {
       // const graphqlEndpoint = `${aemEnvironment}/graphql/execute.json/${projectName}/screenByPath;path=/content/dam/v0/home/home;variation=master?_=${randomNumber}`
 
       const sdk = new AEMHeadless({
-        serviceURL: storedAemEnv,
+        serviceURL: aemEnv,
         endpoint: '/graphql/execute.json',
         fetch: ((resource, options = {}) => {
           if (resource.startsWith('https://author-'))
@@ -69,7 +73,7 @@ export default function Component() {
         })
       });
 
-      sdk.runPersistedQuery('v0/screenByPath', { path: `/content/dam/${storedProjectName}/site/${locale}/home/home`, variation: `master`, v1: randomNumber })
+      sdk.runPersistedQuery('v0/screenByPath', { path: `/content/dam/${aemProject}/site/${locale}/home/home`, variation: `master`, v1: randomNumber })
         .then(({ data }) => {
           setContentLoadAttempted(true);
           if (data) {

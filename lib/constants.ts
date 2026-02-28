@@ -10,6 +10,10 @@ export const DEFAULT_AEM_EDITOR_URL =
   process.env.NEXT_PUBLIC_AEM_EDITOR_URL ??
   "https://author-p124903-e1367755.adobeaemcloud.com";
 
+/** Default AEM project name when app is opened in Universal Editor (iframe) and no value is in localStorage. Override with NEXT_PUBLIC_AEM_PROJECT. */
+export const DEFAULT_AEM_PROJECT =
+  process.env.NEXT_PUBLIC_AEM_PROJECT ?? "v0";
+
 /** Universal Editor CORS script URL. Override with NEXT_PUBLIC_UE_CORS_SCRIPT_URL when using a local UE service (e.g. https://localhost:8001/cors.js). */
 export const UE_CORS_SCRIPT_URL =
   process.env.NEXT_PUBLIC_UE_CORS_SCRIPT_URL ??
@@ -22,3 +26,12 @@ export const AMPLIENCE_HUB =
 /** Amplience: base URL for this storefront (used in visualization URLs). Override with NEXT_PUBLIC_APP_URL. */
 export const AMPLIENCE_APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+/**
+ * Locale segments that can be read from the URL path (e.g. /us/en/magazine → locale "us/en", content "magazine").
+ * Each entry is an array of path segments that form a locale; the rest of the slug is the content path.
+ */
+export const URL_LOCALE_SEGMENTS: readonly (readonly string[])[] = [
+  ["us", "en"],
+  ["en"],
+];
