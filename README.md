@@ -36,12 +36,12 @@ Next.js app with Adobe Experience Manager (AEM) headless and Adobe Commerce inte
 
 ## Scripts
 
-| Command      | Description           |
-| ------------ | --------------------- |
-| `npm run dev`   | Start dev server      |
-| `npm run build` | Production build      |
-| `npm run start` | Start production server |
-| `npm run lint`  | Run ESLint            |
+| Command         | Description                          |
+| --------------- | ------------------------------------ |
+| `npm run dev`   | Start dev server                      |
+| `npm run build` | Production build                     |
+| `npm run start` | Start production server              |
+| `npm run lint`  | Run ESLint                           |
 
 ## Repo and branch
 

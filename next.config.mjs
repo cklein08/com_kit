@@ -1,10 +1,28 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self' https://experience.adobe.com https://*.adobe.com https://*.adobe.io;",
+          },
+        ],
+      },
+    ];
   },
   images: {
     unoptimized: true,

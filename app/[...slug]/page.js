@@ -13,6 +13,7 @@ import AEMHeadless from '@adobe/aem-headless-client-js';
 import { ProductListPage } from "@/components/product-list-page/product-list-page"
 import { ProductDetail } from "@/components/product-detail/product-detail"
 import { getProductWithVariants } from "@/lib/api/plp"
+import { UE_CORS_SCRIPT_URL } from "@/lib/constants"
 
 export default function Page({ params }) {
   const resolvedParams = use(params)
@@ -135,7 +136,7 @@ export default function Page({ params }) {
 
   return (
     <>
-      <Script src="https://universal-editor-service.adobe.io/cors.js" async />
+      <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex flex-col min-h-screen bg-white text-gray-900">
         {/* Top Utility Bar */}
         <div className="utility-bar">

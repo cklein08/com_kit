@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from './providers'
 import { UniversalEditorConnection } from '@/components/universal-editor-connection'
+import { DEFAULT_AEM_EDITOR_URL } from '@/lib/constants'
 
 export const metadata: Metadata = {
   title: 'wknd.running',
   description: 'Running the WKND',
   generator: 'v0.dev',
   other: {
-    'urn:adobe:aue:system:aemconnection': 'aem:https://author-p124903-e1367755.adobeaemcloud.com',
+    'urn:adobe:aue:system:aemconnection': `aem:${DEFAULT_AEM_EDITOR_URL}`,
   },
 }
 

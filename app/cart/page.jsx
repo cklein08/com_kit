@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UE_CORS_SCRIPT_URL } from "@/lib/constants";
 
 function formatPrice(price) {
   if (!price) return "—";
@@ -48,7 +49,7 @@ const EXAMPLE_UPSELL = {
 function CartPageLayout({ config, locale, children }) {
   return (
     <>
-      <Script src="https://universal-editor-service.adobe.io/cors.js" async />
+      <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex min-h-screen flex-col bg-white text-gray-900">
         <div className="utility-bar">
           <Link href="/" className="hover:underline">
