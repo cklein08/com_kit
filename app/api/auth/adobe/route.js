@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 
 const ADOBE_AUTHORIZE_URL = 'https://ims-na1.adobelogin.com/ims/authorize/v2';
-const SCOPES = 'openid,email,profile';
+const SCOPES = 'openid,email,profile,offline_access';
 
 export function GET(request) {
   const clientId = process.env.ADOBE_CLIENT_ID;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
   const redirectUri = `${baseUrl}/api/auth/adobe/callback`;
+  const orgId = process.env.ADOBE_IMS_ORG_ID;
 
   if (!clientId) {
     return NextResponse.json(
@@ -23,6 +24,10 @@ export function GET(request) {
     state,
     response_type: 'code',
   });
+
+  if (orgId) {
+    params.set('org_id', orgId);
+  }
 
   const authorizeUrl = `${ADOBE_AUTHORIZE_URL}?${params.toString()}`;
   return NextResponse.redirect(authorizeUrl);

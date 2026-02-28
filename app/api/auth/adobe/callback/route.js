@@ -71,6 +71,7 @@ export async function GET(request) {
       name: userInfo.name || user.name,
       email: userInfo.email || '',
       sub: userInfo.sub || user.sub,
+      account_type: userInfo.account_type,
     };
   }
 

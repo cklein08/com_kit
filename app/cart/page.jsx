@@ -37,6 +37,14 @@ const PAYMENT_TYPES = [
   { id: "apple", label: "Apple Pay", icon: "🍎" },
 ];
 
+const EXAMPLE_UPSELL = {
+  sku: "WKND-T-Shirt",
+  name: "Running Cap",
+  price: 24,
+  currency: "USD",
+  imageUrl: "/running-cap.png",
+};
+
 function CartPageLayout({ config, locale, children }) {
   return (
     <>
@@ -562,8 +570,30 @@ export default function CartPage() {
               Complete your order
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {/* Upsell product 1: example product card */}
+              <Link
+                href={`/product/${EXAMPLE_UPSELL.sku}`}
+                className="cart-page-upsell-item group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                data-slot="cart-upsell-item-1"
+              >
+                <div className="relative aspect-square w-full bg-gray-100">
+                  <Image
+                    src={EXAMPLE_UPSELL.imageUrl}
+                    alt={EXAMPLE_UPSELL.name}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-3">
+                  <p className="font-medium text-gray-900">{EXAMPLE_UPSELL.name}</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900">
+                    {formatPrice({ amount: { value: EXAMPLE_UPSELL.price, currency: EXAMPLE_UPSELL.currency } })}
+                  </p>
+                </div>
+              </Link>
               {/* Placeholder slots: replace with your product cards or CMS-driven components */}
-              {[1, 2, 3, 4].map((i) => {
+              {[2, 3, 4].map((i) => {
                 const slotId = "cart-upsell-item-" + i;
                 return (
                   <div
