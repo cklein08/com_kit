@@ -79,6 +79,56 @@
   display: block;
 }
 
+.product-detail-recommendations {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.product-detail-recommendations-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.product-detail-recommendation-placeholder {
+  min-height: 80px;
+  padding: 1rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-detail-recommendation-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.product-detail-blog-post {
+  flex: 0 0 200px;
+  min-height: 160px;
+}
+
+@media (max-width: 600px) {
+  .product-detail-recommendations {
+    flex-direction: column;
+  }
+
+  .product-detail-blog-post {
+    flex: 1 1 auto;
+    min-height: 80px;
+  }
+}
+
 .product-detail-info {
   display: flex;
   flex-direction: column;

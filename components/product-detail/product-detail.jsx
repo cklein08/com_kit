@@ -107,6 +107,22 @@ export function ProductDetail({ variantData }) {
               ))}
             </div>
           )}
+          <div className="product-detail-recommendations">
+            <div className="product-detail-recommendations-left">
+              <div className="product-detail-recommendation-placeholder product-detail-cross-sell">
+                <span className="product-detail-recommendation-label">Cross sell</span>
+              </div>
+              <div className="product-detail-recommendation-placeholder product-detail-upsell">
+                <span className="product-detail-recommendation-label">UpSell</span>
+              </div>
+              <div className="product-detail-recommendation-placeholder product-detail-you-might-also-like">
+                <span className="product-detail-recommendation-label">You might also like</span>
+              </div>
+            </div>
+            <div className="product-detail-recommendation-placeholder product-detail-blog-post">
+              <span className="product-detail-recommendation-label">Blog post</span>
+            </div>
+          </div>
         </div>
         <div className="product-detail-info">
           {product.category && (

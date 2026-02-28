@@ -158,12 +158,20 @@ export default function Component() {
               const insertCarouselBefore = categoryGridIndex >= 0 ? categoryGridIndex : blocks.length;
               return (
                 <>
-                  {blocks.map((block, n) => (
-                    <div key={n} className="block-container">
-                      {n === insertCarouselBefore && <RunningShoesCarousel />}
-                      <ModelManager content={block} config={config} />
-                    </div>
-                  ))}
+                  {blocks.map((block, n) => {
+                    const blockEditorProps = {
+                      'data-aue-resource': `urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`,
+                      'data-aue-type': 'component',
+                      'data-aue-label': block?._model?.title ?? 'Block',
+                      'data-aue-model': block?._model?._path,
+                    };
+                    return (
+                      <div key={n} className="block-container" {...blockEditorProps}>
+                        {n === insertCarouselBefore && <RunningShoesCarousel />}
+                        <ModelManager content={block} config={config} />
+                      </div>
+                    );
+                  })}
                 </>
               );
             }

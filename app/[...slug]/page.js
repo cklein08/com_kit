@@ -34,50 +34,70 @@ export default function Page({ params }) {
   const handleSubmit = (e) => { }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const aemEnvironment = localStorage.getItem('aemEnvironment');
-      const projectName = localStorage.getItem('projectName');
+    if (typeof window === 'undefined') return;
+    const storedAemEnv = localStorage.getItem('aemEnvironment');
+    const storedProjectName = localStorage.getItem('projectName');
+    const storedLocale = localStorage.getItem('locale') || 'en';
 
-      if (!aemEnvironment || !projectName) {
-        setShowModal(true);
-        return;
-      }
-      setConfig({
-        env: aemEnvironment,
-        project: projectName,
-      });
-      const randomNumber = Math.random().toString(36).substring(2, 15)
-      const graphqlEndpoint = `${aemEnvironment}/graphql/execute.json/${projectName}/screenByPath;path=/content/dam/v0/home/home;variation=master?_=${randomNumber}`
+    setAemEnvironment(storedAemEnv || '');
+    setProjectName(storedProjectName || '');
 
-      const sdk = new AEMHeadless({
-        serviceURL: aemEnvironment,
-        endpoint: '/graphql/execute.json',
-        fetch: ((resource, options = {}) => {
-          if (resource.startsWith('https://author-'))
-            options.credentials = 'include';
-          return window.fetch(resource, options);
-        })
-      });
-
-      const pathSlug = resolvedParams?.slug?.length ? `/${resolvedParams.slug.join('/')}` : '/'
-      sdk.runPersistedQuery('v0/screenByPath', { path: pathSlug, variation: `master`, v1: randomNumber })
-        .then(({ data }) => {
-          if (data) {
-            setContent(data?.screenByPath?.item);
-            setEditorProp({
-              'data-aue-resource': `urn:aemconnection:${data?.screenByPath?.item?._path}/jcr:content/data/${data?.screenByPath?.item?._variation}`,
-              'data-aue-type': 'container',
-              'data-aue-filter': 'screen',
-              'data-aue-label': 'Screen',
-              'data-aue-model': data?.screenByPath?.item?._model?._path
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(`Error with screen request. ${error.message}`);
-        });
+    if (!storedAemEnv || !storedProjectName) {
+      setShowModal(true);
+      return;
     }
-  }, [resolvedParams]);
+    setConfig({
+      env: storedAemEnv,
+      project: storedProjectName,
+    });
+
+    // Don't fetch screen content for product detail routes
+    if (isProductPath) {
+      setContent(null);
+      setEditorProp({});
+      return;
+    }
+
+    const randomNumber = Math.random().toString(36).substring(2, 15);
+    const sdk = new AEMHeadless({
+      serviceURL: storedAemEnv,
+      endpoint: '/graphql/execute.json',
+      fetch: ((resource, options = {}) => {
+        if (resource.startsWith('https://author-'))
+          options.credentials = 'include';
+        return window.fetch(resource, options);
+      })
+    });
+
+    // Build AEM content path. If URL is already the full path (e.g. /content/dam/v0/site/en/new-arrivals/new-arrivals), use it as-is.
+    const slugSegments = resolvedParams?.slug?.length ? resolvedParams.slug : ['home', 'home'];
+    const isFullAemPath =
+      slugSegments.length >= 5 &&
+      slugSegments[0] === 'content' &&
+      slugSegments[1] === 'dam' &&
+      slugSegments[2] === storedProjectName &&
+      slugSegments[3] === 'site';
+    const path = isFullAemPath
+      ? `/${slugSegments.join('/')}`
+      : `/content/dam/${storedProjectName}/site/${storedLocale}/${slugSegments.join('/')}`;
+
+    sdk.runPersistedQuery('v0/screenByPath', { path, variation: 'master', v1: randomNumber })
+      .then(({ data }) => {
+        if (data?.screenByPath?.item) {
+          setContent(data.screenByPath.item);
+          setEditorProp({
+            'data-aue-resource': `urn:aemconnection:${data.screenByPath.item._path}/jcr:content/data/${data.screenByPath.item._variation}`,
+            'data-aue-type': 'container',
+            'data-aue-filter': 'screen',
+            'data-aue-label': 'Screen',
+            'data-aue-model': data.screenByPath.item._model?._path
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(`Error with screen request. ${error.message}`);
+      });
+  }, [resolvedParams, isProductPath]);
 
   useEffect(() => {
     if (!isProductPath || !productSlug || typeof window === 'undefined') {
@@ -137,11 +157,17 @@ export default function Page({ params }) {
             <ProductDetail variantData={productDetail} />
           ) : (
             content && content.block.map((block, n) => {
+              const blockEditorProps = {
+                'data-aue-resource': `urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`,
+                'data-aue-type': 'component',
+                'data-aue-label': block?._model?.title ?? 'Block',
+                'data-aue-model': block?._model?._path,
+              };
               return (
-                <div key={n} className="block-container">
+                <div key={n} className="block-container" {...blockEditorProps}>
                   <ModelManager key={n} content={block} config={config} />
                 </div>
-              )
+              );
             })
           )}
           {/* <ProductListPage /> */}
