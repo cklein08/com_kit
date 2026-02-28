@@ -215,9 +215,9 @@ export default function CartPage() {
           ))}
         </nav>
 
-        {/* New Arrivals banner from homepage */}
+        {/* New Arrivals banner from homepage (half height) */}
         {config && newArrivalsBanner && (
-          <div className="mb-8 -mx-4 sm:mx-0">
+          <div className="cart-page-new-arrivals-banner mb-8 -mx-4 sm:mx-0">
             <HeroSection content={newArrivalsBanner} config={config} />
           </div>
         )}

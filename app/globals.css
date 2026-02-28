@@ -254,6 +254,27 @@ a {
   }
 }
 
+/* Cart page: New Arrivals banner at half height */
+.cart-page-new-arrivals-banner .hero-section {
+  height: 300px;
+}
+@media (min-width: 768px) {
+  .cart-page-new-arrivals-banner .hero-section.hero {
+    height: 350px;
+  }
+  .cart-page-new-arrivals-banner .hero-section.banner {
+    height: 150px;
+  }
+}
+@media (min-width: 1024px) {
+  .cart-page-new-arrivals-banner .hero-section.hero {
+    height: 400px;
+  }
+  .cart-page-new-arrivals-banner .hero-section.banner {
+    height: 200px;
+  }
+}
+
 .hero-image {
   object-fit: cover;
   object-position: center;
