@@ -1,14 +1,26 @@
 # com_kit
 
-Next.js app with Adobe Experience Manager (AEM) headless and Adobe Commerce integration.
+Next.js app combining **AEM headless**, **Adobe Commerce**, and **Amplience** (patterns from [amplience-sfcc-composable-commerce](https://github.com/amplience/amplience-sfcc-composable-commerce)) for a single storefront.
 
 ## Stack
 
 - **Next.js** 16 (App Router)
 - **React** 19
-- **AEM Headless** (`@adobe/aem-headless-client-js`)
-- **Adobe Commerce** (Commerce Optimizer GraphQL)
+- **AEM Headless** (`@adobe/aem-headless-client-js`) — pages and blocks; **Adobe Universal Editor** for in-context editing
+- **Adobe Commerce** (Commerce Optimizer GraphQL) — product and catalog data
+- **Amplience** (`dc-delivery-sdk-js`, `dc-visualization-sdk`) — Content Studio visualization, toolbar (“site tools”), PDP content blocks, optional slots
 - **Tailwind CSS**, **Radix UI**, **shadcn-style** components
+
+## How content and commerce fit together
+
+| Area | Source | Editor |
+|------|--------|--------|
+| **Home / slug pages** | AEM (screen by path) | Adobe Universal Editor |
+| **Product data** | Adobe Commerce (GraphQL) | — |
+| **Product page layout** | Existing product detail + **Amplience PDP content** (hero, banner, etc. by key `pdp/content/{SKU}`) | Amplience Content Studio (visualization URL) |
+| **Nav / footer** | AEM-driven today; optional Amplience by key (`main-nav`, `footer-nav`) | — |
+
+AEM and Amplience coexist: same layout (MainNav, Footer, AuthBar), same product routes; Amplience adds extra content on product pages and optional slots where you configure it.
 
 ## Setup
 
@@ -24,7 +36,8 @@ Next.js app with Adobe Experience Manager (AEM) headless and Adobe Commerce inte
 
    - **Commerce**: `NEXT_PUBLIC_COMMERCE_OPTIMIZER_URL`, `NEXT_PUBLIC_CATALOG_VIEW_ID`
    - **Auth (Sign in with Adobe, same as AEM author)**: `ADOBE_CLIENT_ID`, `ADOBE_CLIENT_SECRET`, `AUTH_SECRET` (or `ADOBE_SESSION_SECRET`). Optional: `ADOBE_IMS_ORG_ID` to scope sign-in to an org.
-   - Optional: content source (AEM, da.live, Amplience) and related vars
+   - **Amplience (Content Studio)**: `NEXT_PUBLIC_AMPLIENCE_HUB`, `NEXT_PUBLIC_APP_URL` — see [docs/amplience-content-studio.md](docs/amplience-content-studio.md) for visualization and toolbar setup.
+   - Optional: content source (AEM, da.live) and related vars
 
 3. **Run locally**
 
@@ -33,6 +46,8 @@ Next.js app with Adobe Experience Manager (AEM) headless and Adobe Commerce inte
    ```
 
    App runs at [http://localhost:3000](http://localhost:3000).
+
+   Dev uses Webpack (`--webpack`) to avoid Turbopack panics. Use `npm run dev:turbo` for Turbopack.
 
 ## Scripts
 

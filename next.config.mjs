@@ -18,7 +18,7 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors 'self' https://experience.adobe.com https://*.adobe.com https://*.adobe.io;",
+            value: "frame-ancestors 'self' https://experience.adobe.com https://*.adobe.com https://*.adobe.io https://*.amplience.com https://*.amplience.net;",
           },
         ],
       },

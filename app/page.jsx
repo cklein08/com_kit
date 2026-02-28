@@ -148,7 +148,7 @@ export default function Component() {
         </div>
         {/* Main Header/Navbar */}
         {config && (<MainNav config={config} locale={locale} />)}
-        <main className="flex-1" {...editorProps}>  
+        <main className="flex-1" {...editorProps}>
           {(() => {
             const hasContent = content && content.block && content.block.length > 0;
             if (hasContent) {

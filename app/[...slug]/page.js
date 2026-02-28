@@ -12,6 +12,7 @@ import { Button } from "@/components/button"
 import AEMHeadless from '@adobe/aem-headless-client-js';
 import { ProductListPage } from "@/components/product-list-page/product-list-page"
 import { ProductDetail } from "@/components/product-detail/product-detail"
+import { AmplienceWrapper } from "@/components/amplience/wrapper"
 import { getProductWithVariants } from "@/lib/api/plp"
 import { UE_CORS_SCRIPT_URL } from "@/lib/constants"
 
@@ -25,6 +26,7 @@ export default function Page({ params }) {
   const [editorProps, setEditorProp] = useState({});
   const [content, setContent] = useState(null)
   const [productDetail, setProductDetail] = useState(undefined) // ProductWithVariants | null
+  const [productPdp, setProductPdp] = useState(null) // Amplience PDP content (key: pdp/content/{SKU})
   const isProductPath = resolvedParams?.slug?.[0] === 'product' && resolvedParams?.slug?.[1]
   const productSlug = resolvedParams?.slug?.[1]
 
@@ -118,6 +120,25 @@ export default function Page({ params }) {
     return () => { cancelled = true; };
   }, [isProductPath, productSlug]);
 
+  // Amplience PDP content (pdp/content/{SKU})
+  useEffect(() => {
+    if (!isProductPath || !productSlug || typeof window === 'undefined') {
+      setProductPdp(null);
+      return;
+    }
+    let cancelled = false;
+    const key = `pdp/content/${String(productSlug).toUpperCase()}`;
+    fetch(`/api/amplience/content?key=${encodeURIComponent(key)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.active && Array.isArray(data?.content)) setProductPdp(data);
+        else setProductPdp(null);
+      })
+      .catch(() => { if (!cancelled) setProductPdp(null); });
+    return () => { cancelled = true; };
+  }, [isProductPath, productSlug]);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if (projectName) {
@@ -155,7 +176,21 @@ export default function Page({ params }) {
         {config && (<MainNav config={config} />)}
         <main className="flex-1" {...editorProps}>
           {isProductPath ? (
-            <ProductDetail variantData={productDetail} />
+            <>
+              {/* Existing: Adobe Commerce product data via ProductDetail */}
+              <ProductDetail variantData={productDetail} />
+              {/* Amplience (from amplience-sfcc-composable-commerce): PDP content by key pdp/content/{SKU} */}
+              {productPdp?.content?.map((item, i) => {
+                const id = item?._meta?.deliveryId ?? item?.id;
+                if (!id) return null;
+                return (
+                  <AmplienceWrapper
+                    key={id}
+                    fetch={{ id }}
+                  />
+                );
+              })}
+            </>
           ) : (
             content && content.block.map((block, n) => {
               const blockEditorProps = {

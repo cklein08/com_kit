@@ -14,3 +14,11 @@ export const DEFAULT_AEM_EDITOR_URL =
 export const UE_CORS_SCRIPT_URL =
   process.env.NEXT_PUBLIC_UE_CORS_SCRIPT_URL ??
   "https://universal-editor-service.adobe.io/cors.js";
+
+/** Amplience: default hub name for Content Delivery API. Override with NEXT_PUBLIC_AMPLIENCE_HUB. */
+export const AMPLIENCE_HUB =
+  process.env.NEXT_PUBLIC_AMPLIENCE_HUB ?? "sfcccomposable";
+
+/** Amplience: base URL for this storefront (used in visualization URLs). Override with NEXT_PUBLIC_APP_URL. */
+export const AMPLIENCE_APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
