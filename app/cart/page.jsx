@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
+import AEMHeadless from "@adobe/aem-headless-client-js";
 import { useCart } from "@/contexts/cart-context";
 import { MainNav } from "@/components/main-nav";
 import { AuthBar } from "@/components/auth-bar";
 import { Footer } from "@/components/footer";
+import { HeroSection } from "@/components/hero-section/hero-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,6 +81,7 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoError, setPromoError] = useState("");
+  const [newArrivalsBanner, setNewArrivalsBanner] = useState(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -88,6 +91,36 @@ export default function CartPage() {
     setLocale(savedLocale);
     if (env && project) setConfig({ env, project: project });
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !config?.env || !config?.project) return;
+    const sdk = new AEMHeadless({
+      serviceURL: config.env,
+      endpoint: "/graphql/execute.json",
+      fetch: (resource, options = {}) => {
+        if (resource.startsWith("https://author-")) options.credentials = "include";
+        return window.fetch(resource, options);
+      },
+    });
+    const path = `/content/dam/${config.project}/site/${locale}/home/home`;
+    sdk
+      .runPersistedQuery("v0/screenByPath", {
+        path,
+        variation: "master",
+        v1: Math.random().toString(36).substring(2, 15),
+      })
+      .then(({ data }) => {
+        const blocks = data?.screenByPath?.item?.block;
+        if (!Array.isArray(blocks)) return;
+        const hero = blocks.find(
+          (b) =>
+            b?._model?.title === "Hero" &&
+            (b?.title === "New Arrivals" || /new arrivals/i.test(b?.title ?? ""))
+        ) ?? blocks.find((b) => b?._model?.title === "Hero");
+        if (hero) setNewArrivalsBanner(hero);
+      })
+      .catch(() => {});
+  }, [config?.env, config?.project, locale]);
 
   const subtotal = items.reduce(
     (sum, i) => sum + (i.price?.value ?? i.price?.amount?.value ?? 0) * i.quantity,
@@ -164,7 +197,7 @@ export default function CartPage() {
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8">
-        {/* Step indicator */}
+        {/* Step indicator (cart breadcrumb) */}
         <nav className="mb-8 flex items-center gap-2 text-sm text-gray-500">
           {steps.map((s, i) => (
             <span key={s} className="flex items-center gap-2">
@@ -181,6 +214,13 @@ export default function CartPage() {
             </span>
           ))}
         </nav>
+
+        {/* New Arrivals banner from homepage */}
+        {config && newArrivalsBanner && (
+          <div className="mb-8 -mx-4 sm:mx-0">
+            <HeroSection content={newArrivalsBanner} config={config} />
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className={cn("lg:col-span-2", step !== 0 && "space-y-6")}>
