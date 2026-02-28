@@ -36,6 +36,7 @@ export function EditableCarousel({ contentKey = DEFAULT_CONTENT_KEY }) {
     const params = new URLSearchParams({ key: contentKey });
     if (vse) params.set("vse", vse);
     params.set("locale", localeParam);
+    params.set("_t", Date.now().toString());
     fetch(`/api/amplience/content?${params}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -80,9 +81,10 @@ export function EditableCarousel({ contentKey = DEFAULT_CONTENT_KEY }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contentId, ...payload }),
     });
+    const errBody = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || "Save failed");
+      const msg = errBody.error || `Save failed (${res.status})`;
+      throw new Error(msg);
     }
     refetchCarousel();
   };

@@ -75,7 +75,7 @@ flowchart LR
 ### 5. Add the new accordion to the toolbar
 
 - **File**: [components/amplience/toolbar/index.jsx](components/amplience/toolbar/index.jsx)  
-  - Keep existing items (Visualisation, Environments, Sites) and their props unchanged.  
+  - Keep existing items (Visualization, Environments, Sites) and their props unchanged.  
   - Add a new item **after** Sites, e.g. `value: "3"`, `title: "Theme"` (or "Skin picker"), `Component: ThemePickerPanel`, `visible: themes.length > 0`, `props: { themes }`.  
   - `themes` should come from `serverConfig?.themes ?? staticConfig.themes ?? []` (and static config from `getAmplienceConfig()`).  
   - Extend `openedPanels` default to include `"3"` so the new section can be open by default if desired.

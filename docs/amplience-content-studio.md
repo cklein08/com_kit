@@ -44,11 +44,11 @@ For each **Content Type** in Amplience that should open this storefront in the e
 
 3. Optional: add `&locale= en-US` (or your locale) to the URL template if you use locale in the API.
 
-When an author opens that content in Content Studio, the storefront loads in an iframe at that URL. The **toolbar** (Visualisation + Environments panels) appears so they can copy VSE/hub/locale/content ID and switch environment/site.
+When an author opens that content in Content Studio, the storefront loads in an iframe at that URL. The **toolbar** (Visualization + Environments panels) appears so they can copy VSE/hub/locale/content ID and switch environment/site.
 
 ## Toolbar (“site tools”)
 
-- **Visualisation** — Shows and copy Hub name, VSE, locale, content ID.
+- **Visualization** — Shows and copy Hub name, VSE, locale, content ID.
 - **Environments** — If `config/amplience.js` has `envs` configured, authors can switch to another Amplience environment (reloads with that VSE).
 
 The toolbar is rendered when the page URL includes a `vse` query parameter (when opened from Content Studio, or when testing on localhost).
@@ -60,11 +60,11 @@ The toolbar is rendered when the page URL includes a `vse` query parameter (when
    ```
    http://localhost:3000/?vse=your-hub.staging.bigcontent.io
    ```
-   Optional: `&hub=...` and `&contentId=...` and `&locale=en-US` so the **Visualisation** panel shows full values.
+   Optional: `&hub=...` and `&contentId=...` and `&locale=en-US` so the **Visualization** panel shows full values.
 
 2. **Enable skinning (Environments + Sites)**  
    The toolbar has three panels:
-   - **Visualisation** — Always shown when `vse` is set; copy VSE, hub, locale, content ID.
+   - **Visualization** — Always shown when `vse` is set; copy VSE, hub, locale, content ID.
    - **Environments** — Shown only if you add **envs** in `config/amplience.js`. Use it to switch Amplience environment (e.g. Live vs UAT); the page reloads with the selected VSE.
    - **Sites** — Shown when **visualisations** exist (default: Localhost). Use it to open the current page on another storefront URL (e.g. Production, UAT) in a new tab (skinning).
 
@@ -72,7 +72,7 @@ The toolbar is rendered when the page URL includes a `vse` query parameter (when
    - Edit **`config/amplience.js`** and uncomment or add entries:
      - **`envs`** — One object per environment, e.g. `{ name: "Live", hub: "myhub", vse: "https://myhub.vse.amplience.com" }`. Restart the dev server so the API serves the new config. Then the **Environments** panel appears and you can switch env.
      - **`visualisations`** — One object per site, e.g. `{ name: "Production", default: false, url: "https://your-storefront.com" }`. The **Sites** panel will list them; clicking a site opens the same path on that URL in a new tab.
-   - Visit **http://localhost:3000/?vse=...** again. The toolbar shows **Visualisation** (always), **Environments** (if envs are set), and **Sites** (Localhost + any you added). Use **Exit** to clear `vse` and close the toolbar.
+   - Visit **http://localhost:3000/?vse=...** again. The toolbar shows **Visualization** (always), **Environments** (if envs are set), and **Sites** (Localhost + any you added). Use **Exit** to clear `vse` and close the toolbar.
 
 ## Product Carousel (home page)
 
@@ -94,6 +94,11 @@ The home page can show a **product carousel** driven by Amplience content so aut
    so authors can edit the carousel in Content Studio and see the storefront preview.
 
 4. **Edit affordance:** When the storefront is opened with `?vse=` in the URL (e.g. `http://localhost:3000/?vse=your-hub.staging.bigcontent.io`), a **pencil icon** appears on the carousel. Clicking it opens an **edit dialog** where authors can change the title, product line type (search phrase, category, or product list), and for product list mode, **pick products from the catalog** via a searchable product picker. To enable saving changes to Amplience, set `AMPLIENCE_CLIENT_ID` and `AMPLIENCE_CLIENT_SECRET` in your environment (see `.env.example`).
+
+   **If Save fails:** Check the toast/error message. Common causes:
+   - *"Amplience CMA not configured"* — Add `AMPLIENCE_CLIENT_ID` and `AMPLIENCE_CLIENT_SECRET` to `.env` and restart the dev server.
+   - *"Cannot save: no carousel content found"* — Create a Product Carousel content item in Amplience Content Studio and set its delivery key to `home/carousel`.
+   - *"Content item not found"* — The carousel content may have been deleted, or the delivery ID from the Content Delivery API may not match the CMA content item ID (ensure Content Delivery 2 is enabled on your hub).
 
 ## Storefront: PDP, home slot, and nav
 

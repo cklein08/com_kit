@@ -20,13 +20,13 @@ export async function POST(request) {
       );
     }
 
-    const bodyUpdate = {};
-    if (title !== undefined) bodyUpdate.title = title;
-    if (productLineType !== undefined)
-      bodyUpdate.productLineType = productLineType;
-    if (searchPhrase !== undefined) bodyUpdate.searchPhrase = searchPhrase;
-    if (category !== undefined) bodyUpdate.category = category;
-    if (skus !== undefined) bodyUpdate.skus = Array.isArray(skus) ? skus : [];
+    const bodyUpdate = {
+      title: title ?? "",
+      productLineType: productLineType ?? "search",
+      searchPhrase: searchPhrase ?? "",
+      category: category ?? "",
+      skus: Array.isArray(skus) ? skus : [],
+    };
 
     await updateContentItem(contentId, bodyUpdate);
     return NextResponse.json({ ok: true });

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, X } from "lucide-react";
 
 const PRODUCT_LINE_TYPES = [
@@ -90,21 +90,23 @@ function ProductPicker({ selectedProducts, onAdd, onRemove }) {
           </span>
         ))}
       </div>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search catalog to add products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onFocus={() => setOpen(true)}
-              className="pl-9"
-            />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-          <div className="max-h-60 overflow-y-auto">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+        <Input
+          placeholder="Search catalog to add products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onFocus={() => setOpen(true)}
+          onBlur={() => {
+            setTimeout(() => setOpen(false), 150);
+          }}
+          className="pl-9"
+        />
+        {open && (
+          <div
+            className="absolute top-full left-0 right-0 z-[100] mt-1 max-h-60 overflow-y-auto rounded-md border bg-popover p-0 text-popover-foreground shadow-md"
+            onMouseDown={(e) => e.preventDefault()}
+          >
             {loading ? (
               <div className="py-4 text-center text-sm text-muted-foreground">
                 Searching…
@@ -121,7 +123,10 @@ function ProductPicker({ selectedProducts, onAdd, onRemove }) {
                   <li key={p.sku}>
                     <button
                       type="button"
-                      onClick={() => handleSelect(p)}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSelect(p);
+                      }}
                       disabled={selectedSkus.has(p.sku)}
                       className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -142,8 +147,8 @@ function ProductPicker({ selectedProducts, onAdd, onRemove }) {
               </ul>
             )}
           </div>
-        </PopoverContent>
-      </Popover>
+        )}
+      </div>
     </div>
   );
 }
@@ -164,6 +169,7 @@ export function CarouselEditForm({
   const [category, setCategory] = useState(initialConfig?.category ?? "");
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   useEffect(() => {
     const skus = initialConfig?.skus;
@@ -206,24 +212,45 @@ export function CarouselEditForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!contentId) {
+      toast.error("Cannot save: no carousel content found. Create a Product Carousel in Amplience with delivery key home/carousel first.");
       return;
     }
+    if (productLineType === "search" && !searchPhrase.trim()) {
+      toast.error("Search phrase is required when using Search phrase.");
+      setSaveError("Search phrase is required.");
+      return;
+    }
+    if (productLineType === "category" && !category.trim()) {
+      toast.error("Category is required when using Category.");
+      setSaveError("Category is required.");
+      return;
+    }
+    // Temporarily allow empty product list for debugging save issues
+    // if (productLineType === "skuList" && selectedProducts.length === 0) {
+    //   toast.error("Add at least one product when using Product list (SKUs).");
+    //   setSaveError("Add at least one product.");
+    //   return;
+    // }
+    setSaveError(null);
     setSaving(true);
     try {
       const payload = {
         title: title.trim() || "Running shoes",
         productLineType,
-        searchPhrase: productLineType === "search" ? searchPhrase.trim() : undefined,
-        category: productLineType === "category" ? category.trim() : undefined,
+        searchPhrase: productLineType === "search" ? searchPhrase.trim() : "",
+        category: productLineType === "category" ? category.trim() : "",
         skus:
           productLineType === "skuList"
             ? selectedProducts.map((p) => p.sku)
-            : undefined,
+            : [],
       };
       await onSave(payload);
+      toast.success("Carousel updated");
       onClose();
     } catch (err) {
-      console.error("Save failed:", err);
+      const msg = err.message || "Save failed";
+      setSaveError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -293,6 +320,10 @@ export function CarouselEditForm({
         </div>
       )}
 
+      {saveError && (
+        <p className="text-sm text-destructive">{saveError}</p>
+      )}
+
       {productLineType === "skuList" && (
         <ProductPicker
           selectedProducts={selectedProducts}
@@ -305,7 +336,16 @@ export function CarouselEditForm({
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!contentId || saving}>
+        <Button
+          type="submit"
+          disabled={
+            !contentId ||
+            saving ||
+            (productLineType === "search" && !searchPhrase.trim()) ||
+            (productLineType === "category" && !category.trim()) ||
+            false // was: (productLineType === "skuList" && selectedProducts.length === 0) - relaxed for debugging
+          }
+        >
           {saving ? "Saving…" : "Save"}
         </Button>
       </DialogFooter>

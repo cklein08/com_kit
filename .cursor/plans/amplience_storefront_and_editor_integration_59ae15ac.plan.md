@@ -12,9 +12,9 @@ isProject: false
 Your codebase already has **Adobe Universal Editor** wired to **AEM** (`[components/universal-editor-connection.jsx](components/universal-editor-connection.jsx)`, `data-aue-resource` on AEM-driven components). The [Amplience SFCC Composable Commerce](https://github.com/amplience/amplience-sfcc-composable-commerce) repo does **not** use Adobe UE; it uses **Amplience Content Studio** and a **storefront toolbar** for the “editor” experience.
 
 - **Adobe UE (current):** In-context editing for AEM content; connection via `urn:adobe:aue:system:aemconnection` and AEM author URL.
-- **Amplience “editor” experience:** Content Studio opens your storefront in an **iframe** via a **visualization URL**. When that URL is loaded, a **toolbar** appears on the storefront (Preview, Visualisation, Environments, Personalisation). That toolbar is what “site tools” and “skinning” refer to: switching **which storefront URL** and **which Amplience environment** (e.g. UAT vs Live) to use for preview.
+- **Amplience “editor” experience:** Content Studio opens your storefront in an **iframe** via a **visualization URL**. When that URL is loaded, a **toolbar** appears on the storefront (Preview, Visualization, Environments, Personalisation). That toolbar is what “site tools” and “skinning” refer to: switching **which storefront URL** and **which Amplience environment** (e.g. UAT vs Live) to use for preview.
 
-So “skinning the site tools turned on once inside the Universal Editor” in the Amplience world means: **turning on the Amplience toolbar** when the storefront is opened from Content Studio (visualization mode), and using the **Environments** and **Visualisation** panels to choose site/environment. Below is how to pull that into your app.
+So “skinning the site tools turned on once inside the Universal Editor” in the Amplience world means: **turning on the Amplience toolbar** when the storefront is opened from Content Studio (visualization mode), and using the **Environments** and **Visualization** panels to choose site/environment. Below is how to pull that into your app.
 
 ---
 
@@ -55,14 +55,14 @@ When an author opens content in Content Studio, that URL loads your storefront i
 **Source:**  
 
 - `app/components/amplience/toolbar/index.jsx` (panel list and renderer)  
-- Panels under `app/components/amplience/toolbar/` (Preview, Visualisation, Environments, Personalisation, About)  
+- Panels under `app/components/amplience/toolbar/` (Preview, Visualization, Environments, Personalisation, About)  
 - [toolbar-framework.md](https://github.com/amplience/amplience-sfcc-composable-commerce/blob/main/docs/amplience/toolbar-framework.md)
 
-The toolbar is the “site tools” that appear when the site is opened from Content Studio: **Environments** = switch Amplience env (and effectively “skin”/site), **Visualisation** = show/copy VSE, hub, locale, content ID.
+The toolbar is the “site tools” that appear when the site is opened from Content Studio: **Environments** = switch Amplience env (and effectively “skin”/site), **Visualization** = show/copy VSE, hub, locale, content ID.
 
 **In your codebase:**  
 
-- Port the toolbar component and the panels you need (at least Visualisation + Environments for skinning).  
+- Port the toolbar component and the panels you need (at least Visualization + Environments for skinning).  
 - Render the toolbar only when in visualization mode (e.g. when `vse` or a specific query param is present, or when a layout segment is `visualization`).  
 - Replace Chakra UI with your stack (e.g. Radix/shadcn or Tailwind) if you don’t use Chakra.  
 - Feed it `visualisations` and `envs` from your Amplience config so switching environment/site works.
@@ -154,7 +154,7 @@ sequenceDiagram
   ContentStudio->>Storefront: Loads visualization URL (iframe)
   Storefront->>Storefront: Detects vse / visualization mode
   Storefront->>Toolbar: Renders toolbar with panels
-  Toolbar->>Author: Shows Visualisation + Environments
+  Toolbar->>Author: Shows Visualization + Environments
   Author->>Toolbar: Picks different env or site from list
   Toolbar->>Storefront: Updates URL or env (reload/redirect)
   Storefront->>Author: Updated site/skin in iframe
@@ -162,7 +162,7 @@ sequenceDiagram
 
 
 
-- **Visualisations** in config = the list of storefront URLs (“sites”) that can be registered in Amplience content types and selected for preview.  
+- **Visualizations** in config = the list of storefront URLs (“sites”) that can be registered in Amplience content types and selected for preview.  
 - **Environments** in config = the list of Amplience envs (hub + VSE); the **Environments** panel in the toolbar lets authors switch between them.  
 - So “skinning the site” = choosing which of these URLs and which environment to use when viewing the site inside Content Studio; the toolbar is what makes that choice available.
 
@@ -173,7 +173,7 @@ sequenceDiagram
 1. **Config** — Add Amplience config (hub, `visualisations`, `envs`) and env vars for API keys / hub.
 2. **Delivery API** — Add `dc-delivery-sdk-js` and a thin content fetch layer (by id/key, with VSE support).
 3. **Visualization route** — Add `app/visualization/[hubName]/[contentId]/page.jsx` that reads `vse`/locale, fetches content, and renders one content item.
-4. **Toolbar** — Port toolbar + Visualisation + Environments panels; render only in visualization mode; wire to config for env/site list.
+4. **Toolbar** — Port toolbar + Visualization + Environments panels; render only in visualization mode; wire to config for env/site list.
 5. **Content Studio setup** — In Amplience, set the content type visualization URL to your storefront (e.g. `https://your-site/visualization/{{hub.name}}/{{content.sys.id}}?vse={{vse.domain}}`).
 6. **(Optional)** Real-time — Add `dc-visualization-sdk` on the visualization page so edits in Content Studio update the iframe without reload.
 7. **Storefront and product (PDP/PLP)** — AmplienceWrapper + component map; nav by delivery key; PDP content by key `pdp/content/{SKU}` in your PDP page; PLP top/bottom/in-grid content in your category page; optional PDP/PLP visualization routes and real-time refetch (useAmpRtv-style) when in Content Studio.
@@ -193,7 +193,7 @@ sequenceDiagram
 
 | Goal                                                                  | What to pull                                                                                                                | Where it goes                                                                                                                             |
 | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **Skinning / site tools in “the editor”**                             | Toolbar + Visualisation + Environments panels; `visualisations` and `envs` config                                           | Layout or visualization page; show toolbar only in visualization mode; config in `config/amplience.js` or `lib/constants.ts`              |
+| **Skinning / site tools in “the editor”**                             | Toolbar + Visualization + Environments panels; `visualisations` and `envs` config                                           | Layout or visualization page; show toolbar only in visualization mode; config in `config/amplience.js` or `lib/constants.ts`              |
 | **Storefront shows in Amplience “Universal Editor” (Content Studio)** | Visualization route + real-time visualization page pattern                                                                  | `app/visualization/[hubName]/[contentId]/page.jsx`; register same URL pattern in Amplience content types                                  |
 | **Fetch Amplience content**                                           | `app/amplience-api/` + `dc-delivery-sdk-js`                                                                                 | New `lib/amplience/` or `app/api/` + server components / route handlers                                                                   |
 | **Storefront structure**                                              | Nav by key (main-nav, footer-nav), slots by key, AmplienceWrapper + component map                                           | Layout/nav component; page slots; `components/amplience/wrapper` and schema→component mapping                                             |

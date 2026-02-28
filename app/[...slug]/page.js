@@ -1,6 +1,6 @@
 "use client"
 import { useRouter } from 'next/navigation'
-import { use, useState, useEffect } from 'react'
+import { use, useState, useEffect, Suspense } from 'react'
 import Link from "next/link"
 import Script from 'next/script';
 import { MainNav } from "@/components/main-nav"
@@ -244,7 +244,11 @@ export default function Page({ params }) {
                 };
                 return (
                   <div key={n} className="block-container" {...blockEditorProps}>
-                    {n === insertCarouselBefore && <EditableCarousel />}
+                    {n === insertCarouselBefore && (
+                      <Suspense fallback={<div className="min-h-[200px]" />}>
+                        <EditableCarousel />
+                      </Suspense>
+                    )}
                     <ModelManager content={block} config={config} />
                   </div>
                 );

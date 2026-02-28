@@ -50,6 +50,14 @@ function formatPrice(priceType) {
   }).format(priceType.amount.value);
 }
 
+/** 5 placeholder slots when carousel has no products */
+const EMPTY_PLACEHOLDER_SLOTS = Array.from({ length: 5 }, (_, i) => ({
+  sku: `placeholder-${i + 1}`,
+  name: "Product",
+  price: "—",
+  image: "/placeholder.svg",
+}));
+
 const PLACEHOLDER_SHOES = [
   {
     sku: "velocity-run-pro",
@@ -101,8 +109,9 @@ export function RunningShoesCarousel({ config: configProp }) {
     let cancelled = false;
     const type = config.productLineType || "search";
 
-    if (type === "skuList" && Array.isArray(config.skus) && config.skus.length > 0) {
-      getProductsBySkus(
+    if (type === "skuList") {
+      if (Array.isArray(config.skus) && config.skus.length > 0) {
+        getProductsBySkus(
         config.skus,
         CATALOG_VIEW_ID,
         DEFAULT_LOCALE,
@@ -113,6 +122,10 @@ export function RunningShoesCarousel({ config: configProp }) {
         })
         .catch(() => { if (!cancelled) setProducts(PLACEHOLDER_SHOES); })
         .finally(() => { if (!cancelled) setLoading(false); });
+      } else {
+        if (!cancelled) setProducts([]);
+        if (!cancelled) setLoading(false);
+      }
       return () => { cancelled = true; };
     }
 
@@ -174,7 +187,7 @@ export function RunningShoesCarousel({ config: configProp }) {
     config.skus?.join(","),
   ]);
 
-  const items = products.length ? products : PLACEHOLDER_SHOES;
+  const items = products.length ? products : EMPTY_PLACEHOLDER_SLOTS;
 
   return (
     <section className="running-shoes-carousel w-full bg-zinc-50 py-10 px-4">
@@ -195,21 +208,16 @@ export function RunningShoesCarousel({ config: configProp }) {
             className="relative w-full overflow-visible px-10 md:px-14"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {items.map((shoe) => (
-                <CarouselItem
-                  key={shoe.sku}
-                  className="pl-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
-                >
-                  <Link
-                    href={`/product/${shoe.sku}`}
-                    className="group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
-                  >
+              {items.map((shoe) => {
+                const isPlaceholder = shoe.sku.startsWith("placeholder-");
+                const cardContent = (
+                  <>
                     <div className="relative aspect-square bg-zinc-100">
                       <Image
                         src={shoe.image}
                         alt={shoe.name}
                         fill
-                        className="object-cover transition group-hover:scale-105"
+                        className={`object-cover transition ${isPlaceholder ? "" : "group-hover:scale-105"}`}
                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         unoptimized={shoe.image.startsWith("http")}
                       />
@@ -220,9 +228,28 @@ export function RunningShoesCarousel({ config: configProp }) {
                         {shoe.price}
                       </p>
                     </div>
-                  </Link>
-                </CarouselItem>
-              ))}
+                  </>
+                );
+                return (
+                  <CarouselItem
+                    key={shoe.sku}
+                    className="pl-2 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+                  >
+                    {isPlaceholder ? (
+                      <div className="group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+                        {cardContent}
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/product/${shoe.sku}`}
+                        className="group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
+                      >
+                        {cardContent}
+                      </Link>
+                    )}
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
             <CarouselPrevious className="z-10 -left-10 border-zinc-200 bg-white hover:bg-zinc-50 md:-left-12" />
             <CarouselNext className="z-10 -right-10 border-zinc-200 bg-white hover:bg-zinc-50 md:-right-12" />

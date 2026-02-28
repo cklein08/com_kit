@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from "next/link"
 import Script from 'next/script';
 import Head from 'next/head';
@@ -172,7 +172,11 @@ export default function Component() {
                     };
                     return (
                       <div key={n} className="block-container" {...blockEditorProps}>
-                        {n === insertCarouselBefore && <EditableCarousel />}
+                        {n === insertCarouselBefore && (
+                          <Suspense fallback={<div className="min-h-[200px]" />}>
+                            <EditableCarousel />
+                          </Suspense>
+                        )}
                         <ModelManager content={block} config={config} />
                       </div>
                     );
