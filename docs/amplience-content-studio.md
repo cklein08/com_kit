@@ -55,14 +55,24 @@ The toolbar is rendered when the page URL includes a `vse` query parameter (when
 
 ### Show the authoring/skinning tools on localhost
 
-To see the toolbar (Visualisation + Environments = skinning) on **http://localhost:3000** without Content Studio:
-
-1. Add `?vse=` and your Amplience VSE domain to any page, for example:
+1. **Show the popup (toolbar)**  
+   Add `?vse=` to any page so the toolbar appears on the right, e.g.:
    ```
    http://localhost:3000/?vse=your-hub.staging.bigcontent.io
    ```
-2. Optional query params: `&hub=your-hub` and `&contentId=some-id` and `&locale=en-US` so the Visualisation panel shows full values.
-3. The toolbar appears on the right; open the **Visualisation** and **Environments** panels to use the skinning/site tools. Use **Exit** in the toolbar to clear `vse` and return to normal view.
+   Optional: `&hub=...` and `&contentId=...` and `&locale=en-US` so the **Visualisation** panel shows full values.
+
+2. **Enable skinning (Environments + Sites)**  
+   The toolbar has three panels:
+   - **Visualisation** — Always shown when `vse` is set; copy VSE, hub, locale, content ID.
+   - **Environments** — Shown only if you add **envs** in `config/amplience.js`. Use it to switch Amplience environment (e.g. Live vs UAT); the page reloads with the selected VSE.
+   - **Sites** — Shown when **visualisations** exist (default: Localhost). Use it to open the current page on another storefront URL (e.g. Production, UAT) in a new tab (skinning).
+
+   **What to do next:**
+   - Edit **`config/amplience.js`** and uncomment or add entries:
+     - **`envs`** — One object per environment, e.g. `{ name: "Live", hub: "myhub", vse: "https://myhub.vse.amplience.com" }`. Restart the dev server so the API serves the new config. Then the **Environments** panel appears and you can switch env.
+     - **`visualisations`** — One object per site, e.g. `{ name: "Production", default: false, url: "https://your-storefront.com" }`. The **Sites** panel will list them; clicking a site opens the same path on that URL in a new tab.
+   - Visit **http://localhost:3000/?vse=...** again. The toolbar shows **Visualisation** (always), **Environments** (if envs are set), and **Sites** (Localhost + any you added). Use **Exit** to clear `vse` and close the toolbar.
 
 ## Storefront: PDP, home slot, and nav
 

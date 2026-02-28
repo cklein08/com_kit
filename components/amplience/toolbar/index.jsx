@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { VisualisationPanel } from "./visualisation-panel";
 import { EnvironmentsPanel } from "./environments-panel";
+import { SitesPanel } from "./sites-panel";
+import { ThemePickerPanel } from "./theme-picker-panel";
 import { PanelRightOpen, X } from "lucide-react";
 import { getAmplienceConfig } from "@/lib/amplience/config-client";
 
@@ -18,10 +20,20 @@ function inIframe() {
 
 export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
   const [isOpen, setIsOpen] = useState(true);
-  const [openedPanels, setOpenedPanels] = useState(["0", "1"]);
-  const config = getAmplienceConfig();
-  const envs = config.envs || [];
+  const [openedPanels, setOpenedPanels] = useState(["0", "1", "2", "3"]);
+  const [serverConfig, setServerConfig] = useState(null);
+  const staticConfig = getAmplienceConfig();
+  const envs = serverConfig?.envs ?? staticConfig.envs ?? [];
+  const visualisations = serverConfig?.visualisations ?? staticConfig.visualisations ?? [];
+  const themes = serverConfig?.themes ?? staticConfig.themes ?? [];
   const toolbarState = { matchVisible: true };
+
+  useEffect(() => {
+    fetch("/api/amplience/config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setServerConfig(data))
+      .catch(() => {});
+  }, []);
 
   const clearVse = () => {
     if (typeof globalThis.document !== "undefined") {
@@ -45,6 +57,20 @@ export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
       Component: EnvironmentsPanel,
       visible: !!vse && envs.length > 0,
       props: { vse, hubname, envs },
+    },
+    {
+      value: "2",
+      title: "Sites",
+      Component: SitesPanel,
+      visible: visualisations.length > 0,
+      props: { visualisations },
+    },
+    {
+      value: "3",
+      title: "Theme",
+      Component: ThemePickerPanel,
+      visible: themes.length > 0,
+      props: { themes },
     },
   ].filter((i) => i.visible);
 
