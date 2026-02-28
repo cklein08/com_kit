@@ -26,7 +26,8 @@ export default function Component() {
   const [showModal, setShowModal] = useState(false);
   const [editorProps, setEditorProp] = useState({});
   const [locale, setLocale] = useState('en');
-  const [content, setContent] = useState(null)
+  const [content, setContent] = useState(null);
+  const [contentLoadAttempted, setContentLoadAttempted] = useState(false);
 
   const handleCloseModal = () => {
     setShowModal(false)
@@ -36,23 +37,28 @@ export default function Component() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const aemEnvironment = localStorage.getItem('aemEnvironment');
-      const projectName = localStorage.getItem('projectName');
-    
+      const storedAemEnv = localStorage.getItem('aemEnvironment');
+      const storedProjectName = localStorage.getItem('projectName');
 
-      if (!aemEnvironment || !projectName) {
+      setAemEnvironment(storedAemEnv || '');
+      setProjectName(storedProjectName || '');
+
+      if (!storedAemEnv || !storedProjectName) {
         setShowModal(true);
+        setContentLoadAttempted(false);
         return;
       }
       setConfig({
-        env: aemEnvironment,
-        project: projectName,
+        env: storedAemEnv,
+        project: storedProjectName,
       });
+      setContent(null);
+      setContentLoadAttempted(false);
       const randomNumber = Math.random().toString(36).substring(2, 15)
       // const graphqlEndpoint = `${aemEnvironment}/graphql/execute.json/${projectName}/screenByPath;path=/content/dam/v0/home/home;variation=master?_=${randomNumber}`
 
       const sdk = new AEMHeadless({
-        serviceURL: aemEnvironment,
+        serviceURL: storedAemEnv,
         endpoint: '/graphql/execute.json',
         fetch: ((resource, options = {}) => {
           if (resource.startsWith('https://author-'))
@@ -61,8 +67,9 @@ export default function Component() {
         })
       });
 
-      sdk.runPersistedQuery('v0/screenByPath', { path: `/content/dam/${projectName}/site/${locale}/home/home`, variation: `master`, v1: randomNumber })
+      sdk.runPersistedQuery('v0/screenByPath', { path: `/content/dam/${storedProjectName}/site/${locale}/home/home`, variation: `master`, v1: randomNumber })
         .then(({ data }) => {
+          setContentLoadAttempted(true);
           if (data) {
             setContent(data?.screenByPath?.item);
             setEditorProp({
@@ -75,6 +82,7 @@ export default function Component() {
           }
         })
         .catch((error) => {
+          setContentLoadAttempted(true);
           console.log(`Error with screen request. ${error.message}`);
         });
     }
@@ -139,27 +147,42 @@ export default function Component() {
         {/* Main Header/Navbar */}
         {config && (<MainNav config={config} locale={locale} />)}
         <main className="flex-1" {...editorProps}>  
-          {content && content.block && content.block.length > 0 ? (
-            content.block.map((block, n) => (
-              <div key={n} className="block-container">
-                <ModelManager key={n} content={block} config={config} />
+          {(() => {
+            const hasContent = content && content.block && content.block.length > 0;
+            if (hasContent) {
+              return content.block.map((block, n) => (
+                <div key={n} className="block-container">
+                  <ModelManager key={n} content={block} config={config} />
+                </div>
+              ));
+            }
+            const configMissing = !aemEnvironment || !projectName;
+            if (configMissing) {
+              return (
+                <div className="no-content-message">
+                  <p>No content available. Please check your AEM configuration or try again later.</p>
+                  <p>
+                    {aemEnvironment
+                      ? `AEM Environment: ${aemEnvironment} has been defined`
+                      : 'AEM Environment has not been set'}
+                  </p>
+                  <p>
+                    {projectName
+                      ? `Project Name: ${projectName} has been defined`
+                      : 'Project Name has not been set'}
+                  </p>
+                </div>
+              );
+            }
+            if (!contentLoadAttempted) {
+              return null;
+            }
+            return (
+              <div className="no-content-message">
+                <p>No content available. Please check your AEM configuration or try again later.</p>
               </div>
-            ))
-          ) : (
-            <div className="no-content-message">
-              <p>No content available. Please check your AEM configuration or try again later.</p>
-              <p>
-                {aemEnvironment
-                  ? `AEM Environment: ${aemEnvironment} has been defined`
-                  : 'AEM Environment has not been set'}
-              </p>
-              <p>
-                {projectName
-                  ? `Project Name: ${projectName} has been defined`
-                  : 'Project Name has not been set'}
-              </p>
-            </div>
-          )}
+            );
+          })()}
         </main>
         <Footer />
         <Modal isOpen={showModal} onClose={handleCloseModal}>

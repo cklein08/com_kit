@@ -22,9 +22,9 @@ Next.js app with Adobe Experience Manager (AEM) headless and Adobe Commerce inte
 
    Copy `.env.example` to `.env` and set:
 
-   - **Adobe OAuth**: `ADOBE_CLIENT_ID`, `ADOBE_CLIENT_SECRET`, `AUTH_SECRET`
    - **Commerce**: `NEXT_PUBLIC_COMMERCE_OPTIMIZER_URL`, `NEXT_PUBLIC_CATALOG_VIEW_ID`
    - Optional: content source (AEM, da.live, Amplience) and related vars
+   - **Auth**: Sign-in redirects to Adobe identity (no OAuth). For options to get user identity into the app, see [docs/adobe-authentication.md](docs/adobe-authentication.md). If you add session-based auth there, set `AUTH_SECRET` (or `ADOBE_SESSION_SECRET`).
 
 3. **Run locally**
 

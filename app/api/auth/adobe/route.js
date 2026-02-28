@@ -1,34 +1,12 @@
 import { NextResponse } from 'next/server';
 
-const ADOBE_AUTHORIZE_URL = 'https://ims-na1.adobelogin.com/ims/authorize/v2';
-const SCOPES = 'openid,email,profile,offline_access';
+/**
+ * Redirects the user to Adobe's identity system (id.adobe.com) to sign in.
+ * This is not OAuth: we do not exchange tokens or receive user identity.
+ * For the app to know who signed in, see docs/adobe-authentication.md.
+ */
+const ADOBE_SIGN_IN_URL = 'https://id.adobe.com';
 
-export function GET(request) {
-  const clientId = process.env.ADOBE_CLIENT_ID;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
-  const redirectUri = `${baseUrl}/api/auth/adobe/callback`;
-  const orgId = process.env.ADOBE_IMS_ORG_ID;
-
-  if (!clientId) {
-    return NextResponse.json(
-      { error: 'Adobe OAuth not configured. Set ADOBE_CLIENT_ID and ADOBE_CLIENT_SECRET.' },
-      { status: 500 }
-    );
-  }
-
-  const state = crypto.randomUUID();
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    scope: SCOPES,
-    state,
-    response_type: 'code',
-  });
-
-  if (orgId) {
-    params.set('org_id', orgId);
-  }
-
-  const authorizeUrl = `${ADOBE_AUTHORIZE_URL}?${params.toString()}`;
-  return NextResponse.redirect(authorizeUrl);
+export function GET() {
+  return NextResponse.redirect(ADOBE_SIGN_IN_URL);
 }
