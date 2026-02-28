@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
 
 
 export default function Component() {
@@ -150,11 +151,21 @@ export default function Component() {
           {(() => {
             const hasContent = content && content.block && content.block.length > 0;
             if (hasContent) {
-              return content.block.map((block, n) => (
-                <div key={n} className="block-container">
-                  <ModelManager key={n} content={block} config={config} />
-                </div>
-              ));
+              const firstBlock = content.block[0];
+              const restBlocks = content.block.slice(1);
+              return (
+                <>
+                  <div key={0} className="block-container">
+                    <ModelManager content={firstBlock} config={config} />
+                  </div>
+                  <RunningShoesCarousel />
+                  {restBlocks.map((block, n) => (
+                    <div key={n + 1} className="block-container">
+                      <ModelManager content={block} config={config} />
+                    </div>
+                  ))}
+                </>
+              );
             }
             const configMissing = !aemEnvironment || !projectName;
             if (configMissing) {

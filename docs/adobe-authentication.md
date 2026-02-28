@@ -1,25 +1,23 @@
 # Signing into Adobe's systems for authentication
 
-This app does **not** use OAuth. The “Sign in” action sends users to **Adobe’s identity system** ([id.adobe.com](https://id.adobe.com)) so they can sign in there. The app does not receive tokens or user identity from that redirect.
+This app uses **the same type of auth as AEM Cloud Service author** (e.g. [author-*.adobeaemcloud.com](https://author-p124903-e1367755.adobeaemcloud.com)): **Sign in with Adobe** via **Adobe IMS** (OAuth 2.0 / OpenID Connect).
 
-To have the app know who is signed in, you need to add one of the following.
+## How it works
 
-## 1. Adobe IMS (OpenID Connect / OAuth 2.0)
+1. User clicks **Sign in** → app redirects to `https://ims-na1.adobelogin.com/ims/authorize/v2` with `client_id`, `redirect_uri`, scopes (`openid`, `email`, `profile`, `offline_access`), and `state`.
+2. User signs in at Adobe (same experience as AEM author).
+3. IMS redirects back to `/api/auth/adobe/callback` with an authorization code.
+4. Backend exchanges the code for access and refresh tokens, calls the IMS UserInfo endpoint, creates a signed session cookie, and redirects to `/`.
 
-For a web app, the standard way to get user identity from Adobe is **Adobe IMS** with the 3-legged OAuth flow (or OpenID Connect):
+**Required env:** `ADOBE_CLIENT_ID`, `ADOBE_CLIENT_SECRET`, `AUTH_SECRET` (or `ADOBE_SESSION_SECRET`).  
+**Optional:** `ADOBE_IMS_ORG_ID` to scope sign-in to an organization.  
+**Redirect URI** to register in Adobe Developer Console: `https://your-domain/api/auth/adobe/callback` (and for local dev, e.g. `http://localhost:3000/api/auth/adobe/callback` if allowed).
 
-- User is sent to `https://ims-na1.adobelogin.com/ims/authorize/v2` with your `client_id`, `redirect_uri`, and scopes.
-- After sign-in and consent, Adobe redirects back to your app with an authorization code.
-- Your backend exchanges the code for access and refresh tokens and optionally calls the IMS UserInfo endpoint.
-- You then create a session (e.g. signed cookie) with the user’s identity.
+Use an **OAuth Web App** credential in [Adobe Developer Console](https://developer.adobe.com/console/) and add the callback URL to Redirect URI patterns.
 
-Resources:
+## Other options (reference)
 
-- [User authentication (Adobe Developer)](https://developer.adobe.com/developer-console/docs/guides/authentication/UserAuthentication/)
-- [Authorize request (IMS API)](https://developer.adobe.com/developer-console/docs/guides/authentication/UserAuthentication/ims#authorize-request)
-- Optional: use an OAuth library (e.g. Passport.js) or the [@adobe/aio-lib-ims](https://www.npmjs.com/package/@adobe/aio-lib-ims) SDK.
-
-You’ll need an **OAuth Web App** (or Single Page App) credential in the Adobe Developer Console and to implement the authorize and token-exchange routes plus session handling.
+Below are alternative ways to integrate Adobe identity if you need something different.
 
 ## 2. Federated ID / SSO (SAML)
 
@@ -46,6 +44,6 @@ Implementation depends on your deployment (AEM, Edge, etc.) and how Adobe inject
 
 ## Current behavior in this app
 
-- **Sign in**: Redirects to [id.adobe.com](https://id.adobe.com) (with an optional `redirect_uri` back to the app). No tokens or user data are received.
-- **Session**: The app still has a session cookie abstraction (`lib/auth/session.js`) and `/api/auth/session` and `/api/auth/signout`. Until you add IMS OAuth, SAML, or another identity source, no session is created on sign-in, so the app will show the user as signed out.
-- **Adding identity**: Use `createSessionCookie(user, options)` in `lib/auth/session.js` from your chosen flow (e.g. after token exchange or after validating a SAML assertion) and set the cookie in the response.
+- **Sign in**: Uses Adobe IMS OAuth (same as AEM author). Redirects to IMS authorize, then callback exchanges the code for tokens and userinfo and sets a session cookie.
+- **Session**: Stored in an HTTP-only signed cookie (`lib/auth/session.js`). Includes user (name, email, sub, account_type) and tokens (access_token, refresh_token, expires_at) for optional API use.
+- **Sign out**: POST or GET `/api/auth/signout` clears the session cookie.
