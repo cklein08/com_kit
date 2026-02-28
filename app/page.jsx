@@ -151,16 +151,16 @@ export default function Component() {
           {(() => {
             const hasContent = content && content.block && content.block.length > 0;
             if (hasContent) {
-              const firstBlock = content.block[0];
-              const restBlocks = content.block.slice(1);
+              const blocks = content.block;
+              const categoryGridIndex = blocks.findIndex(
+                (b) => b._model?.title && b._model.title.replace(/\s/g, "") === "CategoryGrid"
+              );
+              const insertCarouselBefore = categoryGridIndex >= 0 ? categoryGridIndex : blocks.length;
               return (
                 <>
-                  <div key={0} className="block-container">
-                    <ModelManager content={firstBlock} config={config} />
-                  </div>
-                  <RunningShoesCarousel />
-                  {restBlocks.map((block, n) => (
-                    <div key={n + 1} className="block-container">
+                  {blocks.map((block, n) => (
+                    <div key={n} className="block-container">
+                      {n === insertCarouselBefore && <RunningShoesCarousel />}
                       <ModelManager content={block} config={config} />
                     </div>
                   ))}
