@@ -27,6 +27,28 @@ function formatPrice(priceType) {
   }).format(priceType.amount.value);
 }
 
+const CROSS_SELL_ITEMS = [
+  { id: "cs1", name: "Runner's belt", price: "$42", image: "https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1710161202-51dvqFEiGKL.jpg?crop=1.00xw:0.801xh;0,0.0863xh&resize=980:*" },
+  { id: "cs2", name: "Care kit", price: "$18", image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=128&h=128&fit=crop" },
+];
+const UPSELL_ITEM = {
+  name: "Premium version with extra support",
+  price: "$189",
+  image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=160&h=160&fit=crop",
+  cta: "Upgrade",
+};
+const YOU_MIGHT_LIKE_ITEMS = [
+  { id: "yml1", name: "Classic runner", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=112&h=112&fit=crop" },
+  { id: "yml2", name: "Everyday sneaker", image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=112&h=112&fit=crop" },
+  { id: "yml3", name: "Trail edition", image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=112&h=112&fit=crop" },
+];
+const BLOG_POST = {
+  title: "How to choose the right fit",
+  excerpt: "A quick guide to sizing and comfort for all-day wear.",
+  image: "https://media.istockphoto.com/id/1210120932/photo/close-up-of-athletic-woman-putting-on-sneakers.jpg?s=612x612&w=0&k=20&c=U4jBfMvYjX0Jl2qj76z2XiMznGlYB9T7dgbFT7HflDw=",
+  linkText: "Read more",
+};
+
 export function ProductDetail({ variantData }) {
   const cart = useCart();
   const { user } = useAuth();
@@ -107,22 +129,6 @@ export function ProductDetail({ variantData }) {
               ))}
             </div>
           )}
-          <div className="product-detail-recommendations">
-            <div className="product-detail-recommendations-left">
-              <div className="product-detail-recommendation-placeholder product-detail-cross-sell">
-                <span className="product-detail-recommendation-label">Cross sell</span>
-              </div>
-              <div className="product-detail-recommendation-placeholder product-detail-upsell">
-                <span className="product-detail-recommendation-label">UpSell</span>
-              </div>
-              <div className="product-detail-recommendation-placeholder product-detail-you-might-also-like">
-                <span className="product-detail-recommendation-label">You might also like</span>
-              </div>
-            </div>
-            <div className="product-detail-recommendation-placeholder product-detail-blog-post">
-              <span className="product-detail-recommendation-label">Blog post</span>
-            </div>
-          </div>
         </div>
         <div className="product-detail-info">
           {product.category && (
@@ -257,6 +263,60 @@ export function ProductDetail({ variantData }) {
             </Link>
           </div>
         </div>
+        <div className="product-detail-recommendations">
+          <section className="product-detail-widget product-detail-cross-sell">
+            <h3 className="product-detail-widget-heading">Complete the look</h3>
+            <div className="product-detail-widget-items product-detail-cross-sell-items">
+              {CROSS_SELL_ITEMS.map((item) => (
+                <Link key={item.id} href="#" className="product-detail-widget-card product-detail-cross-sell-card">
+                  <div className="product-detail-widget-card-image-wrap">
+                    <Image src={item.image} alt="" width={64} height={64} className="product-detail-widget-card-image" />
+                  </div>
+                  <div className="product-detail-widget-card-body">
+                    <span className="product-detail-widget-card-name">{item.name}</span>
+                    <span className="product-detail-widget-card-price">{item.price}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+          <section className="product-detail-widget product-detail-upsell">
+            <h3 className="product-detail-widget-heading">Upgrade for more</h3>
+            <div className="product-detail-widget-card product-detail-upsell-card">
+              <div className="product-detail-widget-card-image-wrap product-detail-upsell-image-wrap">
+                <Image src={UPSELL_ITEM.image} alt="" width={80} height={80} className="product-detail-widget-card-image" />
+              </div>
+              <div className="product-detail-widget-card-body">
+                <span className="product-detail-widget-card-name">{UPSELL_ITEM.name}</span>
+                <span className="product-detail-widget-card-price">{UPSELL_ITEM.price}</span>
+                <Button size="sm" variant="outline" className="product-detail-widget-cta">{UPSELL_ITEM.cta}</Button>
+              </div>
+            </div>
+          </section>
+          <section className="product-detail-widget product-detail-you-might-also-like">
+            <h3 className="product-detail-widget-heading">You might also like</h3>
+            <div className="product-detail-widget-items product-detail-you-might-also-like-items">
+              {YOU_MIGHT_LIKE_ITEMS.map((item) => (
+                <Link key={item.id} href="#" className="product-detail-widget-card product-detail-you-might-also-like-card">
+                  <div className="product-detail-widget-card-image-wrap">
+                    <Image src={item.image} alt="" width={56} height={56} className="product-detail-widget-card-image" />
+                  </div>
+                  <span className="product-detail-widget-card-name">{item.name}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </div>
+        <section className="product-detail-widget product-detail-blog-post product-detail-blog-post-right">
+          <div className="product-detail-blog-post-inner">
+            <div className="product-detail-blog-post-image-wrap">
+              <Image src={BLOG_POST.image} alt="" width={200} height={120} className="product-detail-blog-post-image" />
+            </div>
+            <h3 className="product-detail-blog-post-title">{BLOG_POST.title}</h3>
+            <p className="product-detail-blog-post-excerpt">{BLOG_POST.excerpt}</p>
+            <Link href="#" className="product-detail-blog-post-link">{BLOG_POST.linkText} →</Link>
+          </div>
+        </section>
       </div>
     </div>
   );
