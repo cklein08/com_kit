@@ -93,7 +93,7 @@ The home page can show a **product carousel** driven by Amplience content so aut
    ```
    so authors can edit the carousel in Content Studio and see the storefront preview.
 
-4. **Edit affordance:** When the storefront is opened with `?vse=` in the URL (e.g. `http://localhost:3000/?vse=your-hub.staging.bigcontent.io`), a **pencil icon** appears on the carousel. Clicking it opens the Amplience visualization for the carousel content so authors can change the product line (search phrase, category, or SKU list) in Content Studio.
+4. **Edit affordance:** When the storefront is opened with `?vse=` in the URL (e.g. `http://localhost:3000/?vse=your-hub.staging.bigcontent.io`), a **pencil icon** appears on the carousel. Clicking it opens an **edit dialog** where authors can change the title, product line type (search phrase, category, or product list), and for product list mode, **pick products from the catalog** via a searchable product picker. To enable saving changes to Amplience, set `AMPLIENCE_CLIENT_ID` and `AMPLIENCE_CLIENT_SECRET` in your environment (see `.env.example`).
 
 ## Storefront: PDP, home slot, and nav
 
