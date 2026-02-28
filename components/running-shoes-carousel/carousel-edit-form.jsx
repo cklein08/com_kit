@@ -212,7 +212,9 @@ export function CarouselEditForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!contentId) {
-      toast.error("Cannot save: no carousel content found. Create a Product Carousel in Amplience with delivery key home/carousel first.");
+      const msg = "Cannot save: no carousel content found. Create a Product Carousel in Amplience with delivery key home/carousel first.";
+      setSaveError(msg);
+      toast.error(msg);
       return;
     }
     if (productLineType === "search" && !searchPhrase.trim()) {
@@ -258,6 +260,24 @@ export function CarouselEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {saveError && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4"
+        >
+          <p className="flex-1 text-sm text-destructive">{saveError}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setSaveError(null)}
+            className="shrink-0 text-destructive hover:bg-destructive/20"
+            aria-label="Close error"
+          >
+            Cancel
+          </Button>
+        </div>
+      )}
       <div>
         <label htmlFor="carousel-title" className="text-sm font-medium">
           Title
@@ -318,10 +338,6 @@ export function CarouselEditForm({
             className="mt-1"
           />
         </div>
-      )}
-
-      {saveError && (
-        <p className="text-sm text-destructive">{saveError}</p>
       )}
 
       {productLineType === "skuList" && (

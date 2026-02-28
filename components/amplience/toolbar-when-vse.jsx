@@ -11,7 +11,7 @@ import { AmplienceToolbar } from "./toolbar";
  */
 export function AmplienceToolbarWhenVse() {
   const searchParams = useSearchParams();
-  const vse = searchParams.get("vse");
+  const vse = searchParams.get("vse") || searchParams.get("cse");
   const hubname = searchParams.get("hub") || searchParams.get("hubname") || "";
   const contentId = searchParams.get("contentId") || "";
   const locale = searchParams.get("locale") || "en-US";

@@ -25,7 +25,7 @@ const DEFAULT_CONTENT_KEY = "home/carousel";
  */
 export function EditableCarousel({ contentKey = DEFAULT_CONTENT_KEY }) {
   const searchParams = useSearchParams();
-  const vse = searchParams.get("vse");
+  const vse = searchParams.get("vse") || searchParams.get("cse");
   const hub = searchParams.get("hub") || searchParams.get("hubname") || AMPLIENCE_HUB;
   const localeParam = searchParams.get("locale") || "en-US";
 
@@ -76,11 +76,16 @@ export function EditableCarousel({ contentKey = DEFAULT_CONTENT_KEY }) {
 
   const handleSave = async (payload) => {
     if (!contentId) return;
-    const res = await fetch("/api/amplience/content/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contentId, ...payload }),
-    });
+    let res;
+    try {
+      res = await fetch("/api/amplience/content/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentId, ...payload }),
+      });
+    } catch (fetchErr) {
+      throw new Error(fetchErr.message || "Network error. Check your connection.");
+    }
     const errBody = await res.json().catch(() => ({}));
     if (!res.ok) {
       const msg = errBody.error || `Save failed (${res.status})`;

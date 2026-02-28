@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
+import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
+import { AMPLIENCE_HUB, AMPLIENCE_APP_URL } from "@/lib/constants";
 
 /**
  * Renders Product Carousel content from Amplience (for visualization page).
@@ -34,10 +37,25 @@ const DEFAULT_COMPONENTS = {
 };
 
 /**
+ * Builds the Amplience visualization URL for a content item.
+ */
+function buildVisualizationUrl(contentId, hub, vse) {
+  if (!contentId || !hub || !vse) return null;
+  const base = typeof window !== "undefined" ? window.location.origin : AMPLIENCE_APP_URL;
+  const params = new URLSearchParams({ vse });
+  return `${base}/visualization/${encodeURIComponent(hub)}/${encodeURIComponent(contentId)}?${params}`;
+}
+
+/**
  * Renders Amplience content by schema. Pass either pre-fetched content or fetch by id/key.
+ * When ?vse= or ?cse= is in the URL, shows a pencil edit button linking to Content Studio visualization.
  * @param {{ content?: object, fetch?: { id?: string, key?: string }, components?: Record<string, React.ComponentType> }} props
  */
 export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, components = {} }) {
+  const searchParams = useSearchParams();
+  const vse = searchParams.get("vse") || searchParams.get("cse");
+  const hub = searchParams.get("hub") || searchParams.get("hubname") || AMPLIENCE_HUB;
+
   const [content, setContent] = useState(contentProp);
   const [loading, setLoading] = useState(!!fetchProp && !contentProp);
 
@@ -58,12 +76,32 @@ export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, compo
   const schema = content?._meta?.schema;
   const Component = schema ? map[schema] : null;
 
+  const contentId =
+    content?.id ??
+    content?.deliveryId ??
+    content?._meta?.deliveryId ??
+    content?.sys?.id;
+  const visualizationUrl = vse && contentId ? buildVisualizationUrl(contentId, hub, vse) : null;
+  const editLabel = schema ? "content" : "banner";
+
   if (loading) return <div className="animate-pulse h-20 bg-muted rounded" />;
   if (content == null) return null;
-  if (Component) return <Component {...content} />;
-  return (
+
+  const rendered = Component ? (
+    <Component {...content} />
+  ) : (
     <pre className="rounded border bg-muted/50 p-4 text-xs overflow-auto max-h-96">
       {JSON.stringify(content, null, 2)}
     </pre>
   );
+
+  if (visualizationUrl) {
+    return (
+      <EditPencilWrapper href={visualizationUrl} label={editLabel}>
+        {rendered}
+      </EditPencilWrapper>
+    );
+  }
+
+  return rendered;
 }

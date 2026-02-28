@@ -10,6 +10,7 @@ import { MainNav } from "@/components/main-nav";
 import { AuthBar } from "@/components/auth-bar";
 import { Footer } from "@/components/footer";
 import { HeroSection } from "@/components/hero-section/hero-section";
+import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -231,10 +232,19 @@ export default function CartPage() {
           ))}
         </nav>
 
-        {/* New Arrivals banner from homepage (half height) */}
+        {/* New Arrivals / Back to School banner from homepage (half height) */}
         {config && newArrivalsBanner && (
           <div className="cart-page-new-arrivals-banner mb-8 -mx-4 sm:mx-0">
-            <HeroSection content={newArrivalsBanner} config={config} />
+            <EditPencilWrapper
+              href={
+                config.env && newArrivalsBanner._path
+                  ? `${config.env.replace(/\/$/, "")}/editor.html${newArrivalsBanner._path.startsWith("/") ? newArrivalsBanner._path : `/${newArrivalsBanner._path}`}`
+                  : null
+              }
+              label="banner"
+            >
+              <HeroSection content={newArrivalsBanner} config={config} />
+            </EditPencilWrapper>
           </div>
         )}
 
