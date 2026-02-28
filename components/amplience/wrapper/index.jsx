@@ -1,6 +1,28 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
+
+/**
+ * Renders Product Carousel content from Amplience (for visualization page).
+ */
+function ProductCarouselFromContent(content) {
+  const config = {
+    title: content.title,
+    productLineType: content.productLineType || "search",
+    searchPhrase: content.searchPhrase,
+    category: content.category,
+    skus: Array.isArray(content.skus) ? content.skus : undefined,
+  };
+  return <RunningShoesCarousel config={config} />;
+}
+
+/**
+ * Schema URI for Product Carousel content type in Amplience.
+ * Set this in your Amplience content type schema.
+ */
+export const PRODUCT_CAROUSEL_SCHEMA =
+  "https://amplience.com/components/product-carousel";
 
 /**
  * Maps Amplience content type schema URI to React component.
@@ -8,7 +30,7 @@ import { useState, useEffect, useMemo } from "react";
  * @see https://github.com/amplience/amplience-sfcc-composable-commerce/blob/main/docs/amplience/amplience-components-list.md
  */
 const DEFAULT_COMPONENTS = {
-  // Example: "https://sfcc.com/components/hero": HeroComponent,
+  [PRODUCT_CAROUSEL_SCHEMA]: ProductCarouselFromContent,
 };
 
 /**

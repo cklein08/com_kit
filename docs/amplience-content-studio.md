@@ -74,6 +74,27 @@ The toolbar is rendered when the page URL includes a `vse` query parameter (when
      - **`visualisations`** — One object per site, e.g. `{ name: "Production", default: false, url: "https://your-storefront.com" }`. The **Sites** panel will list them; clicking a site opens the same path on that URL in a new tab.
    - Visit **http://localhost:3000/?vse=...** again. The toolbar shows **Visualisation** (always), **Environments** (if envs are set), and **Sites** (Localhost + any you added). Use **Exit** to clear `vse` and close the toolbar.
 
+## Product Carousel (home page)
+
+The home page can show a **product carousel** driven by Amplience content so authors can choose which product line appears (search phrase, category, or a list of SKUs).
+
+1. **Content type:** In Amplience, create a content type **Product Carousel** (or **Home Carousel**) with schema URI set to `https://amplience.com/components/product-carousel` so the storefront can map it to the carousel component. Add the following fields:
+   - **title** (string) — e.g. "Running shoes"
+   - **productLineType** (enum: `search` | `category` | `skuList`)
+   - **searchPhrase** (string) — used when productLineType is `search`
+   - **category** (string) — used when productLineType is `category` (matches product `item_category`)
+   - **skus** (array of strings) — used when productLineType is `skuList`
+
+2. **Delivery key:** Create a content item of this type and set its **delivery key** to `home/carousel`. The home page fetches content by this key and passes the config to the carousel.
+
+3. **Visualization URL:** In the content type’s **Visualizations** tab, set:
+   ```
+   {{NEXT_PUBLIC_APP_URL}}/visualization/{{hub.name}}/{{content.sys.id}}?vse={{vse.domain}}
+   ```
+   so authors can edit the carousel in Content Studio and see the storefront preview.
+
+4. **Edit affordance:** When the storefront is opened with `?vse=` in the URL (e.g. `http://localhost:3000/?vse=your-hub.staging.bigcontent.io`), a **pencil icon** appears on the carousel. Clicking it opens the Amplience visualization for the carousel content so authors can change the product line (search phrase, category, or SKU list) in Content Studio.
+
 ## Storefront: PDP, home slot, and nav
 
 - **Home page:** The home route (`/`) is driven by **AEM** only (no override). To add an optional Amplience slot (e.g. `home/slot/top`), render `<AmplienceWrapper fetch={{ key: "home/slot/top" }} />` in `app/page.jsx` where you want it; use delivery key `home/slot/top` in Amplience.

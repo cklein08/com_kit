@@ -10,12 +10,31 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { searchProducts } from "@/lib/api/plp";
+import { searchProducts, getProductsBySkus } from "@/lib/api/plp";
 import {
   CATALOG_VIEW_ID,
   DEFAULT_LOCALE,
   DEFAULT_PRICE_BOOK,
 } from "@/lib/constants";
+
+/** @typedef {'search'|'category'|'skuList'} ProductLineType */
+
+/**
+ * Carousel config (from Amplience or defaults).
+ * @typedef {{
+ *   title?: string;
+ *   productLineType?: ProductLineType;
+ *   searchPhrase?: string;
+ *   category?: string;
+ *   skus?: string[];
+ * }} CarouselConfig
+ */
+
+const DEFAULT_CONFIG = {
+  title: "Running shoes",
+  productLineType: "search",
+  searchPhrase: "running shoes",
+};
 
 function formatPrice(priceType) {
   if (
@@ -64,30 +83,77 @@ const PLACEHOLDER_SHOES = [
   },
 ];
 
-export function RunningShoesCarousel() {
+function productToItem(p) {
+  return {
+    sku: p.sku,
+    name: p.name,
+    price: formatPrice(p.price?.final ?? p.price?.regular),
+    image: p.images?.[0]?.url || "/placeholder.svg",
+  };
+}
+
+export function RunningShoesCarousel({ config: configProp }) {
+  const config = { ...DEFAULT_CONFIG, ...configProp };
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    const type = config.productLineType || "search";
+
+    if (type === "skuList" && Array.isArray(config.skus) && config.skus.length > 0) {
+      getProductsBySkus(
+        config.skus,
+        CATALOG_VIEW_ID,
+        DEFAULT_LOCALE,
+        DEFAULT_PRICE_BOOK
+      )
+        .then((list) => {
+          if (!cancelled) setProducts(list.map(productToItem));
+        })
+        .catch(() => { if (!cancelled) setProducts(PLACEHOLDER_SHOES); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+      return () => { cancelled = true; };
+    }
+
+    if (type === "category" && config.category) {
+      searchProducts(
+        CATALOG_VIEW_ID,
+        DEFAULT_LOCALE,
+        DEFAULT_PRICE_BOOK,
+        "",
+        50,
+        1
+      )
+        .then((result) => {
+          if (!cancelled && result?.products?.length) {
+            const filtered = result.products.filter(
+              (p) => (p.category || "").toLowerCase() === config.category.toLowerCase()
+            );
+            setProducts(
+              filtered.length >= 3
+                ? filtered.map(productToItem)
+                : result.products.slice(0, 10).map(productToItem)
+            );
+          } else if (!cancelled) setProducts(PLACEHOLDER_SHOES);
+        })
+        .catch(() => { if (!cancelled) setProducts(PLACEHOLDER_SHOES); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+      return () => { cancelled = true; };
+    }
+
+    const phrase = (config.searchPhrase || "").trim() || "running shoes";
     searchProducts(
       CATALOG_VIEW_ID,
       DEFAULT_LOCALE,
       DEFAULT_PRICE_BOOK,
-      "running shoes",
+      phrase,
       10,
       1
     )
       .then((result) => {
         if (!cancelled && result?.products?.length >= 3) {
-          setProducts(
-            result.products.map((p) => ({
-              sku: p.sku,
-              name: p.name,
-              price: formatPrice(p.price?.final ?? p.price?.regular),
-              image: p.images?.[0]?.url || "/placeholder.svg",
-            }))
-          );
+          setProducts(result.products.map(productToItem));
         } else if (!cancelled) {
           setProducts(PLACEHOLDER_SHOES);
         }
@@ -101,7 +167,12 @@ export function RunningShoesCarousel() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [
+    config.productLineType,
+    config.searchPhrase,
+    config.category,
+    config.skus?.join(","),
+  ]);
 
   const items = products.length ? products : PLACEHOLDER_SHOES;
 
@@ -109,7 +180,7 @@ export function RunningShoesCarousel() {
     <section className="running-shoes-carousel w-full bg-zinc-50 py-10 px-4">
       <div className="mx-auto max-w-6xl">
         <h2 className="mb-6 text-2xl font-semibold tracking-tight text-zinc-900">
-          Running shoes
+          {config.title || DEFAULT_CONFIG.title}
         </h2>
         {loading ? (
           <div className="flex justify-center py-12 text-zinc-500">

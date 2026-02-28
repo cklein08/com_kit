@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { VisualisationPanel } from "./visualisation-panel";
+import { VisualizationPanel } from "./visualization-panel";
 import { EnvironmentsPanel } from "./environments-panel";
 import { SitesPanel } from "./sites-panel";
 import { ThemePickerPanel } from "./theme-picker-panel";
@@ -20,14 +20,12 @@ function inIframe() {
 
 export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
   const [isOpen, setIsOpen] = useState(true);
-  const [openedPanels, setOpenedPanels] = useState(["0", "1", "2", "3"]);
+  const [openedPanels, setOpenedPanels] = useState([]);
   const [serverConfig, setServerConfig] = useState(null);
   const staticConfig = getAmplienceConfig();
   const envs = serverConfig?.envs ?? staticConfig.envs ?? [];
   const visualisations = serverConfig?.visualisations ?? staticConfig.visualisations ?? [];
   const themes = serverConfig?.themes ?? staticConfig.themes ?? [];
-  const toolbarState = { matchVisible: true };
-
   useEffect(() => {
     fetch("/api/amplience/config")
       .then((r) => (r.ok ? r.json() : null))
@@ -46,10 +44,10 @@ export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
   const items = [
     {
       value: "0",
-      title: "Visualisation",
-      Component: VisualisationPanel,
+      title: "Visualization",
+      Component: VisualizationPanel,
       visible: !!vse,
-      props: { showVse: vse, hubname, locale, contentId, toolbarState },
+      props: { showVse: vse, hubname, locale, contentId },
     },
     {
       value: "1",

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
+import { EditableCarousel } from "@/components/running-shoes-carousel/editable-carousel";
 import { UE_CORS_SCRIPT_URL, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
 
 
@@ -172,7 +172,7 @@ export default function Component() {
                     };
                     return (
                       <div key={n} className="block-container" {...blockEditorProps}>
-                        {n === insertCarouselBefore && <RunningShoesCarousel />}
+                        {n === insertCarouselBefore && <EditableCarousel />}
                         <ModelManager content={block} config={config} />
                       </div>
                     );

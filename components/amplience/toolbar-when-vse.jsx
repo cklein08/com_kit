@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { AmplienceToolbar } from "./toolbar";
 
 /**
- * Renders the Amplience authoring toolbar (Visualisation + Environments = "skinning")
+ * Renders the Amplience authoring toolbar (Visualization + Environments = "skinning")
  * when the page URL has ?vse= in the query string. Use this to show the toolbar on
  * any route (e.g. http://localhost:3000/?vse=your-vse.staging.bigcontent.io) for testing
  * or when the storefront is opened from Amplience Content Studio.

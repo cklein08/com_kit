@@ -146,6 +146,24 @@ export async function getProductBySku(
   return match ?? result.products[0] ?? null;
 }
 
+/**
+ * Fetch multiple products by SKU in parallel (for carousel skuList mode).
+ */
+export async function getProductsBySkus(
+  skus: string[],
+  viewId: string = CATALOG_VIEW_ID,
+  locale: string = DEFAULT_LOCALE,
+  priceBookId: string = "wknd_global"
+): Promise<Product[]> {
+  if (!skus?.length) return [];
+  const results = await Promise.all(
+    skus.map((sku) =>
+      getProductBySku(sku, viewId, locale, priceBookId)
+    )
+  );
+  return results.filter((p): p is Product => p != null);
+}
+
 export type ColorVariant = {
   color: string;
   sku: string;

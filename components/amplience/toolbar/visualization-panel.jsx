@@ -30,7 +30,7 @@ function CopyField({ value, label }) {
   );
 }
 
-export function VisualisationPanel({ showVse, hubname, locale, contentId }) {
+export function VisualizationPanel({ showVse, hubname, locale, contentId }) {
   const [showInfo, setShowInfo] = useState(true);
 
   return (

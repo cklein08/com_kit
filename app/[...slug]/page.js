@@ -13,6 +13,7 @@ import AEMHeadless from '@adobe/aem-headless-client-js';
 import { ProductListPage } from "@/components/product-list-page/product-list-page"
 import { ProductDetail } from "@/components/product-detail/product-detail"
 import { AmplienceWrapper } from "@/components/amplience/wrapper"
+import { EditableCarousel } from "@/components/running-shoes-carousel/editable-carousel"
 import { getProductWithVariants } from "@/lib/api/plp"
 import { UE_CORS_SCRIPT_URL, URL_LOCALE_SEGMENTS, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants"
 
@@ -162,8 +163,14 @@ export default function Page({ params }) {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (cancelled) return;
-        if (data?.active && Array.isArray(data?.content)) setProductPdp(data);
-        else setProductPdp(null);
+        // API returns a single content item; page expects { active, content: array }
+        if (data?.active && Array.isArray(data?.content)) {
+          setProductPdp(data);
+        } else if (data && typeof data === 'object' && (data._meta || data.deliveryId)) {
+          setProductPdp({ active: true, content: [data] });
+        } else {
+          setProductPdp(null);
+        }
       })
       .catch(() => { if (!cancelled) setProductPdp(null); });
     return () => { cancelled = true; };
@@ -222,19 +229,27 @@ export default function Page({ params }) {
               })}
             </>
           ) : (
-            content && content.block.map((block, n) => {
-              const blockEditorProps = {
-                'data-aue-resource': `urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`,
-                'data-aue-type': 'component',
-                'data-aue-label': block?._model?.title ?? 'Block',
-                'data-aue-model': block?._model?._path,
-              };
-              return (
-                <div key={n} className="block-container" {...blockEditorProps}>
-                  <ModelManager key={n} content={block} config={config} />
-                </div>
+            content && content.block && (() => {
+              const blocks = content.block;
+              const categoryGridIndex = blocks.findIndex(
+                (b) => b._model?.title && b._model.title.replace(/\s/g, '') === 'CategoryGrid'
               );
-            })
+              const insertCarouselBefore = categoryGridIndex >= 0 ? categoryGridIndex : blocks.length;
+              return blocks.map((block, n) => {
+                const blockEditorProps = {
+                  'data-aue-resource': `urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`,
+                  'data-aue-type': 'component',
+                  'data-aue-label': block?._model?.title ?? 'Block',
+                  'data-aue-model': block?._model?._path,
+                };
+                return (
+                  <div key={n} className="block-container" {...blockEditorProps}>
+                    {n === insertCarouselBefore && <EditableCarousel />}
+                    <ModelManager content={block} config={config} />
+                  </div>
+                );
+              });
+            })()
           )}
           {/* <ProductListPage /> */}
         </main>
