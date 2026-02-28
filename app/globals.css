@@ -169,6 +169,122 @@
     color: hsl(var(--muted-foreground));
   }
 
+  /* Banners / hero */
+  [data-amplience-theme="blue"] .hero-content,
+  [data-amplience-theme="blue"] .hero-subheadline,
+  [data-amplience-theme="blue"] .hero-headline {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .hero-button {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border: none;
+  }
+  [data-amplience-theme="blue"] .hero-button:hover {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+  }
+
+  /* Carousel */
+  [data-amplience-theme="blue"] .running-shoes-carousel {
+    background-color: hsl(var(--muted));
+  }
+  [data-amplience-theme="blue"] .running-shoes-carousel h2,
+  [data-amplience-theme="blue"] .running-shoes-carousel p {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .running-shoes-carousel a[href*="/product/"] {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-color: hsl(var(--border));
+  }
+  [data-amplience-theme="blue"] .running-shoes-carousel a[href*="/product/"]:hover {
+    border-color: hsl(var(--ring));
+  }
+  [data-amplience-theme="blue"] .running-shoes-carousel button[type="button"] {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .running-shoes-carousel button[type="button"]:hover {
+    background-color: hsl(var(--muted));
+  }
+  [data-amplience-theme="blue"] .running-shoes-carousel .aspect-square {
+    background-color: hsl(var(--muted));
+  }
+
+  /* Call to actions / buttons and body copy (product detail, cart, etc.) */
+  [data-amplience-theme="blue"] .product-detail-main-image-wrap,
+  [data-amplience-theme="blue"] .product-detail-thumb {
+    background-color: hsl(var(--muted));
+  }
+  [data-amplience-theme="blue"] .product-detail-thumb:hover {
+    border-color: hsl(var(--border));
+  }
+  [data-amplience-theme="blue"] .product-detail-thumb.active {
+    border-color: hsl(var(--primary));
+    background-color: hsl(var(--primary));
+  }
+  [data-amplience-theme="blue"] .product-detail-category,
+  [data-amplience-theme="blue"] .product-detail-price-original {
+    color: hsl(var(--muted-foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-title,
+  [data-amplience-theme="blue"] .product-detail-price-current,
+  [data-amplience-theme="blue"] .product-detail-option-label,
+  [data-amplience-theme="blue"] .product-detail-description-heading {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-size-btn,
+  [data-amplience-theme="blue"] .product-detail-color-btn {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-size-btn:hover,
+  [data-amplience-theme="blue"] .product-detail-color-btn:hover {
+    border-color: hsl(var(--muted-foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-size-btn.active,
+  [data-amplience-theme="blue"] .product-detail-color-btn.active {
+    background-color: hsl(var(--primary));
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-description,
+  [data-amplience-theme="blue"] .product-detail-description-short,
+  [data-amplience-theme="blue"] .product-detail-description-long,
+  [data-amplience-theme="blue"] .product-detail-description p {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-long-description {
+    border-top-color: hsl(var(--border));
+  }
+  [data-amplience-theme="blue"] .product-detail-blog-post-image-wrap {
+    background-color: hsl(var(--muted));
+  }
+  [data-amplience-theme="blue"] .product-detail-blog-post-title {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-blog-post-excerpt {
+    color: hsl(var(--muted-foreground));
+  }
+  [data-amplience-theme="blue"] .product-detail-blog-post-link,
+  [data-amplience-theme="blue"] .product-detail-back,
+  [data-amplience-theme="blue"] .product-detail-empty a {
+    color: hsl(var(--primary));
+  }
+  [data-amplience-theme="blue"] .cart-page-banner-slot {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-collections {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-color: hsl(var(--border));
+  }
+
   [data-amplience-theme="green"] {
     --background: 142 70% 18%;
     --foreground: 0 0% 98%;
@@ -262,6 +378,49 @@
     color: hsl(var(--muted-foreground));
   }
 
+  [data-amplience-theme="green"] .hero-content,
+  [data-amplience-theme="green"] .hero-subheadline,
+  [data-amplience-theme="green"] .hero-headline { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .hero-button { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: none; }
+  [data-amplience-theme="green"] .hero-button:hover { background-color: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+  [data-amplience-theme="green"] .running-shoes-carousel { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="green"] .running-shoes-carousel h2,
+  [data-amplience-theme="green"] .running-shoes-carousel p { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .running-shoes-carousel a[href*="/product/"] { background-color: hsl(var(--card)); color: hsl(var(--card-foreground)); border-color: hsl(var(--border)); }
+  [data-amplience-theme="green"] .running-shoes-carousel a[href*="/product/"]:hover { border-color: hsl(var(--ring)); }
+  [data-amplience-theme="green"] .running-shoes-carousel button[type="button"] { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .running-shoes-carousel button[type="button"]:hover { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="green"] .running-shoes-carousel .aspect-square { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="green"] .product-detail-main-image-wrap,
+  [data-amplience-theme="green"] .product-detail-thumb { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="green"] .product-detail-thumb:hover { border-color: hsl(var(--border)); }
+  [data-amplience-theme="green"] .product-detail-thumb.active { border-color: hsl(var(--primary)); background-color: hsl(var(--primary)); }
+  [data-amplience-theme="green"] .product-detail-category,
+  [data-amplience-theme="green"] .product-detail-price-original { color: hsl(var(--muted-foreground)); }
+  [data-amplience-theme="green"] .product-detail-title,
+  [data-amplience-theme="green"] .product-detail-price-current,
+  [data-amplience-theme="green"] .product-detail-option-label,
+  [data-amplience-theme="green"] .product-detail-description-heading { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-detail-size-btn,
+  [data-amplience-theme="green"] .product-detail-color-btn { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-detail-size-btn:hover,
+  [data-amplience-theme="green"] .product-detail-color-btn:hover { border-color: hsl(var(--muted-foreground)); }
+  [data-amplience-theme="green"] .product-detail-size-btn.active,
+  [data-amplience-theme="green"] .product-detail-color-btn.active { background-color: hsl(var(--primary)); border-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  [data-amplience-theme="green"] .product-detail-description,
+  [data-amplience-theme="green"] .product-detail-description-short,
+  [data-amplience-theme="green"] .product-detail-description-long,
+  [data-amplience-theme="green"] .product-detail-description p { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-detail-long-description { border-top-color: hsl(var(--border)); }
+  [data-amplience-theme="green"] .product-detail-blog-post-image-wrap { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="green"] .product-detail-blog-post-title { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-detail-blog-post-excerpt { color: hsl(var(--muted-foreground)); }
+  [data-amplience-theme="green"] .product-detail-blog-post-link,
+  [data-amplience-theme="green"] .product-detail-back,
+  [data-amplience-theme="green"] .product-detail-empty a { color: hsl(var(--primary)); }
+  [data-amplience-theme="green"] .cart-page-banner-slot { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-collections { background-color: hsl(var(--card)); color: hsl(var(--card-foreground)); border-color: hsl(var(--border)); }
+
   [data-amplience-theme="blue-green"] {
     --background: 180 55% 18%;
     --foreground: 0 0% 98%;
@@ -354,6 +513,49 @@
   [data-amplience-theme="blue-green"] .footer-legal-links a:hover {
     color: hsl(var(--muted-foreground));
   }
+
+  [data-amplience-theme="blue-green"] .hero-content,
+  [data-amplience-theme="blue-green"] .hero-subheadline,
+  [data-amplience-theme="blue-green"] .hero-headline { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .hero-button { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border: none; }
+  [data-amplience-theme="blue-green"] .hero-button:hover { background-color: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel h2,
+  [data-amplience-theme="blue-green"] .running-shoes-carousel p { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel a[href*="/product/"] { background-color: hsl(var(--card)); color: hsl(var(--card-foreground)); border-color: hsl(var(--border)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel a[href*="/product/"]:hover { border-color: hsl(var(--ring)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel button[type="button"] { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel button[type="button"]:hover { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="blue-green"] .running-shoes-carousel .aspect-square { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="blue-green"] .product-detail-main-image-wrap,
+  [data-amplience-theme="blue-green"] .product-detail-thumb { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="blue-green"] .product-detail-thumb:hover { border-color: hsl(var(--border)); }
+  [data-amplience-theme="blue-green"] .product-detail-thumb.active { border-color: hsl(var(--primary)); background-color: hsl(var(--primary)); }
+  [data-amplience-theme="blue-green"] .product-detail-category,
+  [data-amplience-theme="blue-green"] .product-detail-price-original { color: hsl(var(--muted-foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-title,
+  [data-amplience-theme="blue-green"] .product-detail-price-current,
+  [data-amplience-theme="blue-green"] .product-detail-option-label,
+  [data-amplience-theme="blue-green"] .product-detail-description-heading { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-size-btn,
+  [data-amplience-theme="blue-green"] .product-detail-color-btn { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-size-btn:hover,
+  [data-amplience-theme="blue-green"] .product-detail-color-btn:hover { border-color: hsl(var(--muted-foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-size-btn.active,
+  [data-amplience-theme="blue-green"] .product-detail-color-btn.active { background-color: hsl(var(--primary)); border-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-description,
+  [data-amplience-theme="blue-green"] .product-detail-description-short,
+  [data-amplience-theme="blue-green"] .product-detail-description-long,
+  [data-amplience-theme="blue-green"] .product-detail-description p { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-long-description { border-top-color: hsl(var(--border)); }
+  [data-amplience-theme="blue-green"] .product-detail-blog-post-image-wrap { background-color: hsl(var(--muted)); }
+  [data-amplience-theme="blue-green"] .product-detail-blog-post-title { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-blog-post-excerpt { color: hsl(var(--muted-foreground)); }
+  [data-amplience-theme="blue-green"] .product-detail-blog-post-link,
+  [data-amplience-theme="blue-green"] .product-detail-back,
+  [data-amplience-theme="blue-green"] .product-detail-empty a { color: hsl(var(--primary)); }
+  [data-amplience-theme="blue-green"] .cart-page-banner-slot { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-collections { background-color: hsl(var(--card)); color: hsl(var(--card-foreground)); border-color: hsl(var(--border)); }
 }
 
 @layer base {

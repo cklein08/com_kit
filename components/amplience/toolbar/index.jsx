@@ -90,7 +90,7 @@ export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
       {isOpen && (
         <div className="w-[min(400px,100vw)] border bg-background shadow-lg rounded-l-md overflow-hidden flex flex-col max-h-[100vh]">
           <div className="flex items-center justify-between border-b px-3 py-2">
-            <span className="text-sm font-medium">Amplience</span>
+            <span className="text-sm font-medium">Amplience Integration</span>
             <div className="flex gap-1">
               {!inIframe() && (
                 <Button type="button" variant="ghost" size="sm" onClick={clearVse}>
