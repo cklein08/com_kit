@@ -197,7 +197,6 @@ export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", pla
   }
 
   if (!content) {
-    if (!placeholder) return null;
     if (vse) {
       return (
         <DropZone
@@ -211,7 +210,8 @@ export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", pla
         </DropZone>
       );
     }
-    return <div className={className}>{placeholder}</div>;
+    if (placeholder) return <div className={className}>{placeholder}</div>;
+    return null;
   }
 
   return (
