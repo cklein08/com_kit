@@ -31,6 +31,7 @@ import {
 import { capitalize } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
 import { AmplienceSlot } from "@/components/amplience/drop-zone";
+import { PlpBanner } from "@/components/amplience/plp-banner";
 import { PlpFacets } from "./plp-facets";
 import { PlpCategoryCarousel } from "./plp-category-carousel";
 import { PlpShoppableImage } from "./plp-shoppable-image";
@@ -615,6 +616,19 @@ export function ProductListPage({ content, config }) {
                   slotKey={plpBannerKey}
                   fallbackKey={plpBannerKey !== "plp/slot/top" ? "plp/slot/top" : undefined}
                   label="Banner"
+                  placeholder={
+                    <PlpBanner
+                      headline="New Season"
+                      strapline="Discover the latest arrivals"
+                      background={{
+                        image: {
+                          url: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&q=80",
+                        },
+                        alt: "New Season fashion",
+                      }}
+                      link={{ url: "/", title: "Shop Now" }}
+                    />
+                  }
                 />
               </div>
             )}

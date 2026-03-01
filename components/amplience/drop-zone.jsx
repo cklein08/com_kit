@@ -84,8 +84,6 @@ export function DropZone({ slotKey, label, isEmpty, children, className = "" }) 
 export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", placeholder }) {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const searchParams = useSearchParams();
-  const vse = searchParams.get("vse") || searchParams.get("cse");
 
   const cancelledRef = useRef(false);
 
@@ -158,7 +156,7 @@ export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", pla
     return <div className={`min-h-[60px] animate-pulse rounded bg-muted ${className}`} />;
   }
 
-  if (!content && !vse) {
+  if (!content) {
     return placeholder ? <div className={className}>{placeholder}</div> : null;
   }
 
