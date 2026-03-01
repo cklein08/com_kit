@@ -34,6 +34,7 @@ import { AmplienceWrapper } from "@/components/amplience/wrapper";
 import { PlpBanner } from "@/components/amplience/plp-banner";
 import { PlpFacets } from "./plp-facets";
 import { PlpCategoryCarousel } from "./plp-category-carousel";
+import { PlpShoppableImage } from "./plp-shoppable-image";
 import { useAuth } from "@/contexts/auth-context";
 import { useWishlist } from "@/contexts/wishlist-context";
 import { useLoginRequired } from "@/contexts/login-required-context";
@@ -117,6 +118,7 @@ export function ProductListPage({ content, config }) {
   const [selectedPriceBook, setSelectedPriceBook] =
     useState(DEFAULT_PRICE_BOOK);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasReachedEnd, setHasReachedEnd] = useState(false);
   const [plpBannerKey, setPlpBannerKey] = useState(null);
   const [plpProductLineKey, setPlpProductLineKey] = useState(null);
   const [productLineContent, setProductLineContent] = useState(null);
@@ -272,6 +274,7 @@ export function ProductListPage({ content, config }) {
   const loadProducts = useCallback(
     async (page = 1, append = false) => {
       try {
+        if (!append) setHasReachedEnd(false);
         let products, totalCount;
 
         // Category or skuList: use cached productLineProducts, filter by search, paginate client-side
@@ -295,6 +298,8 @@ export function ProductListPage({ content, config }) {
           }
           setTotalCount(totalCount);
           setCurrentPage(page);
+          if (products.length === 0 && append) setHasReachedEnd(true);
+          else if (products.length >= totalCount) setHasReachedEnd(true);
           return;
         }
 
@@ -352,6 +357,8 @@ export function ProductListPage({ content, config }) {
         }
         setTotalCount(totalCount);
         setCurrentPage(page);
+        if (products.length === 0 && append) setHasReachedEnd(true);
+        else if (products.length >= totalCount) setHasReachedEnd(true);
       } catch (error) {
         console.error("Error loading products:", error);
       }
@@ -385,7 +392,7 @@ export function ProductListPage({ content, config }) {
     priceRange: selectedPriceRange || undefined,
   });
 
-  const hasMoreProducts = products.length < totalCount;
+  const hasMoreProducts = !hasReachedEnd && products.length < totalCount;
 
   const productLineContentId =
     productLineContent?.id ??
@@ -632,7 +639,10 @@ export function ProductListPage({ content, config }) {
           {filteredProducts.map((product, index) => (
             <Fragment key={product.sku}>
               {index === 8 && productViewMode === "grid" && (
-                <PlpCategoryCarousel />
+                <>
+                  <PlpCategoryCarousel />
+                  <PlpShoppableImage />
+                </>
               )}
               <Card className={`product-card ${productViewMode === "list" ? "product-card-list" : ""}`}>
               <CardContent className="product-card-content">

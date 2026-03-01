@@ -138,6 +138,128 @@
   }
 }
 
+/* PLP shoppable image (left side of grid, below carousel) - matches product card row height */
+.plp-shoppable-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+  min-height: 0;
+  align-self: stretch;
+}
+
+.plp-shoppable-image-inner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.plp-shoppable-image-img {
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+/* Mobify-style hover product preview tooltip */
+.plp-shoppable-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+}
+
+.plp-shoppable-preview-collection {
+  min-width: 120px;
+}
+
+.plp-shoppable-preview-image {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.plp-shoppable-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.plp-shoppable-preview-name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plp-shoppable-preview-price {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0.125rem 0 0 0;
+}
+
+.plp-shoppable-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.plp-shoppable-hotspot:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* Mobify-style hotspot: rounded rect with gradient shimmer animation */
+.plp-shoppable-hotspot-icon {
+  width: 119px;
+  height: 51px;
+  border-radius: 10px;
+  background: linear-gradient(
+    -45deg,
+    transparent,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent,
+    transparent
+  ) 0% 0% / 400% 400%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  animation: plp-hotspot-gradient 7s ease 0s infinite normal none running;
+}
+
+.plp-shoppable-hotspot:hover .plp-shoppable-hotspot-icon {
+  background: linear-gradient(
+    -45deg,
+    transparent,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent,
+    transparent
+  ) 0% 0% / 400% 400%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes plp-hotspot-gradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
 /* Two-column layout: facets sidebar + results */
 .plp-layout {
   display: flex;
