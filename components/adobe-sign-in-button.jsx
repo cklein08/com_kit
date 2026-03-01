@@ -1,14 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getAdobeClientId } from "@/lib/auth/config";
 
 const IMS_AUTHORIZE_URL = "https://ims-na1.adobelogin.com/ims/authorize/v2";
 const SCOPE = "AdobeID,openid,read_organizations,additional_info.projectedProductContext";
 const FIVE_MIN_MS = 5 * 60 * 1000;
-
-function getClientId() {
-  return process.env.NEXT_PUBLIC_ADOBE_CLIENT_ID || "";
-}
 
 function getCleanRedirectTarget() {
   try {
@@ -38,12 +35,13 @@ function parseTokenFromParams(params) {
  * AdobeSignInButton – IMS implicit flow (token in localStorage).
  * Redirect, parse token from hash/query/pathname, silent refresh, sign out.
  */
-export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
+export function AdobeSignInButton({ onAuthenticated, onSignOut, authenticated: externalAuth }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [internalAuth, setInternalAuth] = useState(false);
+  const isAuthenticated = externalAuth ?? internalAuth;
 
-  const clientId = getClientId();
+  const clientId = getAdobeClientId();
 
   const performSilentRefresh = useCallback(
     () =>
@@ -87,7 +85,7 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
                 Date.now() + (expiresIn ? parseInt(expiresIn, 10) : 3600) * 1000;
               localStorage.setItem("accessToken", token);
               localStorage.setItem("tokenExpiresAt", String(expiresAt));
-              setIsAuthenticated(true);
+              setInternalAuth(true);
               onAuthenticated?.(token);
               resolve(token);
             } else {
@@ -124,7 +122,7 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
     setError(null);
     setLoading(true);
     if (!clientId) {
-      setError("Adobe Client ID not configured. Set NEXT_PUBLIC_ADOBE_CLIENT_ID.");
+      setError("Adobe Client ID not configured. Add NEXT_PUBLIC_ADOBE_CLIENT_ID to .env or run: node scripts/generate-runtime-config.cjs");
       setLoading(false);
       return;
     }
@@ -143,7 +141,7 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
   }, [clientId]);
 
   const handleSignOut = useCallback(() => {
-    setIsAuthenticated(false);
+    setInternalAuth(false);
     localStorage.removeItem("accessToken");
     localStorage.removeItem("tokenExpiresAt");
     setError(null);
@@ -157,7 +155,7 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
         Date.now() + (expiresIn ? parseInt(expiresIn, 10) : 3600) * 1000;
       localStorage.setItem("accessToken", token);
       localStorage.setItem("tokenExpiresAt", String(expiresAt));
-      setIsAuthenticated(true);
+      setInternalAuth(true);
       onAuthenticated?.(token);
       setupTokenRefresh();
       setLoading(false);
@@ -242,13 +240,13 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
           } else {
             localStorage.removeItem("accessToken");
             localStorage.removeItem("tokenExpiresAt");
-            setIsAuthenticated(false);
+            setInternalAuth(false);
           }
           setLoading(false);
         });
         return;
       }
-      setIsAuthenticated(true);
+      setInternalAuth(true);
       onAuthenticated?.(storedToken);
       setupTokenRefresh();
     }
@@ -261,11 +259,16 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut }) {
         type="button"
         onClick={isAuthenticated ? handleSignOut : handleSignIn}
         disabled={loading || !clientId}
-        className="hover:underline"
+        className={isAuthenticated ? "hover:underline text-sm" : "hover:underline"}
+        style={{ opacity: loading ? 0.7 : 1 }}
       >
-        {loading ? (isAuthenticated ? "Signing out…" : "Signing in…") : isAuthenticated ? "Sign Out" : "Sign In"}
+        {loading
+          ? (isAuthenticated ? "Signing out…" : "Signing in…")
+          : (isAuthenticated ? "Sign Out" : "Sign In")}
       </button>
-      {error && <span className="ml-2 text-sm text-red-600">{error}</span>}
+      {error && (
+        <div className="mt-2 text-sm text-destructive">{error}</div>
+      )}
     </>
   );
 }

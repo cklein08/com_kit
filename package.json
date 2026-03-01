@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev --webpack",
-    "dev:turbo": "next dev",
+    "build": "node scripts/generate-runtime-config.cjs && next build",
+    "dev": "node scripts/generate-runtime-config.cjs && next dev --webpack",
+    "dev:turbo": "node scripts/generate-runtime-config.cjs && next dev",
     "lint": "next lint",
     "start": "next start",
     "tunnel": "nice -n 15 ngrok http 3000"

@@ -5,7 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
 import { PlpBanner } from "@/components/amplience/plp-banner";
 import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
-import { AMPLIENCE_HUB, AMPLIENCE_APP_URL } from "@/lib/constants";
+import { AMPLIENCE_HUB } from "@/lib/constants";
+
+/** Avoid hydration mismatch: base URL only available after mount. */
+function useVisualizationBase() {
+  const [base, setBase] = useState(null);
+  useEffect(() => setBase(typeof window !== "undefined" ? window.location.origin : null), []);
+  return base;
+}
 
 /**
  * Schema URI for Product Carousel content type in Amplience.
@@ -45,12 +52,12 @@ const DEFAULT_COMPONENTS = {
 
 /**
  * Builds the Amplience visualization URL for a content item.
+ * Uses baseUrl to avoid hydration mismatch (server has no window.location.origin).
  */
-function buildVisualizationUrl(contentId, hub, vse) {
-  if (!contentId || !hub || !vse) return null;
-  const base = typeof window !== "undefined" ? window.location.origin : AMPLIENCE_APP_URL;
+function buildVisualizationUrl(contentId, hub, vse, baseUrl) {
+  if (!contentId || !hub || !vse || !baseUrl) return null;
   const params = new URLSearchParams({ vse });
-  return `${base}/visualization/${encodeURIComponent(hub)}/${encodeURIComponent(contentId)}?${params}`;
+  return `${baseUrl}/visualization/${encodeURIComponent(hub)}/${encodeURIComponent(contentId)}?${params}`;
 }
 
 /**
@@ -63,6 +70,7 @@ export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, compo
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
   const hub = searchParams.get("hub") || searchParams.get("hubname") || AMPLIENCE_HUB;
+  const visualizationBase = useVisualizationBase();
 
   const [content, setContent] = useState(contentProp);
   const [loading, setLoading] = useState(!!fetchProp && !contentProp);
@@ -123,7 +131,7 @@ export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, compo
     content?.deliveryId ??
     content?._meta?.deliveryId ??
     content?.sys?.id;
-  const visualizationUrl = vse && contentId ? buildVisualizationUrl(contentId, hub, vse) : null;
+  const visualizationUrl = vse && contentId ? buildVisualizationUrl(contentId, hub, vse, visualizationBase) : null;
   const editLabel = schema ? "content" : "banner";
 
   if (loading) return <div className="animate-pulse h-20 bg-muted rounded" />;

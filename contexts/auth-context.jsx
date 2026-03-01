@@ -2,17 +2,14 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { isCookieAuth } from "@/lib/auth/cookie-auth";
+import { getAdobeClientId } from "@/lib/auth/config";
 
 const IMS_AUTHORIZE_URL = "https://ims-na1.adobelogin.com/ims/authorize/v2";
 const SCOPE = "AdobeID,openid,read_organizations,additional_info.projectedProductContext";
 const FIVE_MIN_MS = 5 * 60 * 1000;
 
-function getClientId() {
-  return process.env.NEXT_PUBLIC_ADOBE_CLIENT_ID || "";
-}
-
 function isImsImplicitConfigured() {
-  return !!getClientId();
+  return !!getAdobeClientId();
 }
 
 function parseTokenFromParams(params) {
@@ -48,7 +45,7 @@ const AuthContext = createContext({
   accessToken: null,
   signIn: () => {},
   signOut: () => {},
-  setAccessTokenFromIms: () => {},
+  handleImsAuthenticated: () => {},
 });
 
 export function AuthProvider({ children }) {
@@ -58,16 +55,35 @@ export function AuthProvider({ children }) {
   const [signInUrl, setSignInUrl] = useState("/api/auth/adobe");
   const [logoutUrl, setLogoutUrl] = useState("/api/auth/signout");
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
-  const cookieAuth = typeof window !== "undefined" && isCookieAuth();
+  useEffect(() => setMounted(true), []);
+
+  // Defer cookieAuth until after mount to avoid hydration mismatch (server has no window)
+  const cookieAuth = mounted && typeof window !== "undefined" && isCookieAuth();
   const authenticated = !!accessToken || cookieAuth || !!user;
 
-  const setAccessTokenFromIms = useCallback((token) => {
-    setAccessToken(token);
+  const fetchImsProfile = useCallback(async (token) => {
+    const res = await fetch("/api/auth/ims/profile", {
+      headers: { Authorization: token },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { name: data.name, email: data.email, sub: data.sub };
   }, []);
 
+  const handleImsAuthenticated = useCallback(
+    async (token) => {
+      setAccessToken(token);
+      setAuthProvider("ims_implicit");
+      const profile = await fetchImsProfile(token);
+      if (profile) setUser(profile);
+    },
+    [fetchImsProfile]
+  );
+
   const performSilentRefresh = useCallback(() => {
-    const clientId = getClientId();
+    const clientId = getAdobeClientId();
     if (!clientId) return Promise.resolve(null);
 
     return new Promise((resolve) => {
@@ -126,15 +142,6 @@ export function AuthProvider({ children }) {
     }
   }, [performSilentRefresh]);
 
-  const fetchImsProfile = useCallback(async (token) => {
-    const res = await fetch("/api/auth/ims/profile", {
-      headers: { Authorization: token },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return { name: data.name, email: data.email, sub: data.sub };
-  }, []);
-
   const signIn = useCallback(() => {
     if (isImsImplicitConfigured() && !cookieAuth) {
       try {
@@ -143,7 +150,7 @@ export function AuthProvider({ children }) {
         // ignore
       }
       const params = new URLSearchParams({
-        client_id: getClientId(),
+        client_id: getAdobeClientId(),
         redirect_uri: window.location.href,
         scope: SCOPE,
         response_type: "token",
@@ -174,6 +181,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // When IMS implicit is configured, AdobeSignInButton handles URL token parsing.
+    // Skip here to avoid duplicate processing and race conditions.
+    const imsHandlesUrl = isImsImplicitConfigured() && !cookieAuth;
+
     const processToken = async (tok, expiresIn) => {
       const token = `Bearer ${tok}`;
       const expiresAt = Date.now() + (expiresIn ? parseInt(expiresIn, 10) : 3600) * 1000;
@@ -187,7 +198,7 @@ export function AuthProvider({ children }) {
       window.location.replace(getCleanRedirectTarget());
     };
 
-    if (window.location.hash) {
+    if (!imsHandlesUrl && window.location.hash) {
       try {
         const params = new URLSearchParams(window.location.hash.substring(1));
         const { accessToken: tok, expiresIn, error: err, errorDescription } = parseTokenFromParams(params);
@@ -205,7 +216,7 @@ export function AuthProvider({ children }) {
       }
     }
 
-    if (window.location.search?.includes("access_token=")) {
+    if (!imsHandlesUrl && window.location.search?.includes("access_token=")) {
       try {
         const params = new URLSearchParams(window.location.search.substring(1));
         const { accessToken: tok, expiresIn, error: err } = parseTokenFromParams(params);
@@ -218,7 +229,7 @@ export function AuthProvider({ children }) {
       }
     }
 
-    if (window.location.pathname?.includes("access_token")) {
+    if (!imsHandlesUrl && window.location.pathname?.includes("access_token")) {
       try {
         const idx = window.location.pathname.indexOf("access_token=");
         if (idx !== -1) {
@@ -263,7 +274,7 @@ export function AuthProvider({ children }) {
 
     if (cookieAuth) {
       setAuthProvider("cookie");
-      fetch("/auth/user")
+      fetch("/auth/user", { credentials: "include" })
         .then((res) => res.ok && res.json())
         .then((data) => setUser(data))
         .catch(() => {})
@@ -295,9 +306,9 @@ export function AuthProvider({ children }) {
       accessToken,
       signIn,
       signOut,
-      setAccessTokenFromIms,
+      handleImsAuthenticated,
     }),
-    [user, loading, authenticated, authProvider, accessToken, signIn, signOut, setAccessTokenFromIms]
+    [user, loading, authenticated, authProvider, accessToken, signIn, signOut, handleImsAuthenticated]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
