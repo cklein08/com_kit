@@ -109,7 +109,7 @@ const LinkItem = ({ item, activeMegaMenu, handleMouseEnter, handleMouseLeave, co
                         <Link href="#">Jackets & Vests</Link>
                       </li>
                     </ul>
-                  </div><div className="mega-menu-column">
+                  </div>                <div className="mega-menu-column">
                     <h4>Accessories</h4>
                     <ul>
                       <li>
@@ -123,6 +123,13 @@ const LinkItem = ({ item, activeMegaMenu, handleMouseEnter, handleMouseLeave, co
                       </li>
                       <li>
                         <Link href="#">Gloves</Link>
+                      </li>
+                    </ul>
+                  </div><div className="mega-menu-column">
+                    <h4>Blog</h4>
+                    <ul>
+                      <li>
+                        <Link href="/blog">All Posts</Link>
                       </li>
                     </ul>
                   </div></> }
@@ -212,6 +219,14 @@ const LinkItem = ({ item, activeMegaMenu, handleMouseEnter, handleMouseLeave, co
                 </li>
               </ul>
             </div>
+            <div className="mega-menu-column">
+              <h4>Blog</h4>
+              <ul>
+                <li>
+                  <Link href="/blog">All Posts</Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       )}
@@ -276,6 +291,9 @@ export function MainNav({ config, locale = 'en' }) {
         {content && content.map((item, index) => (
           <LinkItem key={index} item={item} config={config} activeMegaMenu={activeMegaMenu} handleMouseEnter={handleMouseEnter} handleMouseLeave={handleMouseLeave} />
         ))}
+        <Link href="/blog" className="main-nav-item">
+          Blog
+        </Link>
       </nav>
 
       {/* Right-aligned icons */}

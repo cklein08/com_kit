@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Heart, Pencil } from "lucide-react";
+import { BlogWidget } from "@/components/blog-widget/blog-widget";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,13 +51,6 @@ const YOU_MIGHT_LIKE_ITEMS = [
   { id: "yml2", name: "Everyday sneaker", image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=112&h=112&fit=crop" },
   { id: "yml3", name: "Trail edition", image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=112&h=112&fit=crop" },
 ];
-const BLOG_POST = {
-  title: "How to choose the right fit",
-  excerpt: "A quick guide to sizing and comfort for all-day wear.",
-  image: "https://media.istockphoto.com/id/1210120932/photo/close-up-of-athletic-woman-putting-on-sneakers.jpg?s=612x612&w=0&k=20&c=U4jBfMvYjX0Jl2qj76z2XiMznGlYB9T7dgbFT7HflDw=",
-  linkText: "Read more",
-};
-
 export function ProductDetail({ variantData, config, productSlug }) {
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
@@ -76,6 +70,7 @@ export function ProductDetail({ variantData, config, productSlug }) {
   const [editProductLineDialogOpen, setEditProductLineDialogOpen] = useState(false);
   const [editCrossSellDialogOpen, setEditCrossSellDialogOpen] = useState(false);
   const [editUpsellDialogOpen, setEditUpsellDialogOpen] = useState(false);
+  const [blogData, setBlogData] = useState(null);
 
   const product = variantData?.product;
   const sizes = variantData?.sizes ?? [];
@@ -161,6 +156,17 @@ export function ProductDetail({ variantData, config, productSlug }) {
   useEffect(() => {
     refetchUpsell();
   }, [refetchUpsell]);
+
+  useEffect(() => {
+    if (!productSlug) {
+      setBlogData(null);
+      return;
+    }
+    fetch(`/api/aem/blog?productSlug=${encodeURIComponent(productSlug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setBlogData(data))
+      .catch(() => setBlogData(null));
+  }, [productSlug]);
 
   useEffect(() => {
     const config = productLineContent;
@@ -337,14 +343,6 @@ export function ProductDetail({ variantData, config, productSlug }) {
         skus: Array.isArray(productLineContentUpsell.skus) ? productLineContentUpsell.skus : undefined,
       }
     : undefined;
-
-  const aemBlogEditorUrl =
-    vse &&
-    config?.env &&
-    productSlug
-      ? `${config.env.replace(/\/$/, "")}/editor.html/content/site/product/${productSlug}`
-      : null;
-  const showBlogPencil = !!vse && !!aemBlogEditorUrl;
 
   const handleProductLineSave = async (payload) => {
     if (!productLineContentId) return;
@@ -737,31 +735,12 @@ export function ProductDetail({ variantData, config, productSlug }) {
             </div>
           </section>
         </div>
-        <section className="product-detail-widget product-detail-blog-post product-detail-blog-post-right relative">
-          <div className="product-detail-blog-post-inner">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span />
-              {showBlogPencil && (
-                <a
-                  href={aemBlogEditorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Edit in AEM"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-900"
-                  aria-label="Edit blog post in AEM"
-                >
-                  <Pencil className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-            <div className="product-detail-blog-post-image-wrap">
-              <Image src={BLOG_POST.image} alt="" width={200} height={120} className="product-detail-blog-post-image" />
-            </div>
-            <h3 className="product-detail-blog-post-title">{BLOG_POST.title}</h3>
-            <p className="product-detail-blog-post-excerpt">{BLOG_POST.excerpt}</p>
-            <Link href="#" className="product-detail-blog-post-link">{BLOG_POST.linkText} →</Link>
-          </div>
-        </section>
+        <BlogWidget
+          blog={blogData}
+          config={config}
+          showPencil={!!vse}
+          productSlug={productSlug}
+        />
       </div>
     </div>
   );

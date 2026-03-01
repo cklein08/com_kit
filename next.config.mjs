@@ -42,6 +42,11 @@ const nextConfig = {
         hostname: "hips.hearstapps.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "author-p124903-e1367755.adobeaemcloud.com",
+        pathname: "/**",
+      },
     ],
   },
 }

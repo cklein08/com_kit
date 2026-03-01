@@ -1,0 +1,6 @@
+/* BlogWidget - reuses product-detail-blog-post-* from product-detail.css */
+.blog-widget-author {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin: 0;
+}
