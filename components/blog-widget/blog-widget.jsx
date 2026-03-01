@@ -16,10 +16,10 @@ import "./blog-widget.css";
  * @param {string} productSlug - Product slug for fallback editor URL (product page in AEM)
  */
 const DEFAULT_BLOG = {
-  title: "How to choose the right fit",
+  title: "The Perfect Fit: A Runner's Guide to All-Day Comfort",
   excerpt: "A quick guide to sizing and comfort for all-day wear.",
   image: "https://media.istockphoto.com/id/1210120932/photo/close-up-of-athletic-woman-putting-on-sneakers.jpg?s=612x612&w=0&k=20&c=U4jBfMvYjX0Jl2qj76z2XiMznGlYB9T7dgbFT7HflDw=",
-  urlSlug: null,
+  urlSlug: "how-to-choose-the-right-fit",
 };
 
 export function BlogWidget({ blog, config, showPencil = false, productSlug }) {

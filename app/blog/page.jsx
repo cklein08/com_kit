@@ -9,6 +9,15 @@ import { AuthBar } from "@/components/auth-bar";
 import { Footer } from "@/components/footer";
 import { UE_CORS_SCRIPT_URL, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
 
+/** Fallback blog matching the PDP widget when no AEM content exists */
+const DEFAULT_BLOG = {
+  title: "The Perfect Fit: A Runner's Guide to All-Day Comfort",
+  excerpt: "A quick guide to sizing and comfort for all-day wear.",
+  image: "https://media.istockphoto.com/id/1210120932/photo/close-up-of-athletic-woman-putting-on-sneakers.jpg?s=612x612&w=0&k=20&c=U4jBfMvYjX0Jl2qj76z2XiMznGlYB9T7dgbFT7HflDw=",
+  urlSlug: "how-to-choose-the-right-fit",
+  author: null,
+};
+
 function sortBlogsNewToOld(items) {
   if (!Array.isArray(items) || items.length === 0) return items;
   return [...items].sort((a, b) => {
@@ -42,7 +51,8 @@ export default function BlogListPage() {
       .then((r) => (r.ok ? r.json() : []))
       .then((data) => {
         const items = Array.isArray(data) ? data : [];
-        setBlogs(sortBlogsNewToOld(items));
+        const list = items.length > 0 ? sortBlogsNewToOld(items) : [DEFAULT_BLOG];
+        setBlogs(list);
         setLoading(false);
       })
       .catch(() => {
@@ -56,12 +66,12 @@ export default function BlogListPage() {
       <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <div className="utility-bar">
-          <Link href="/" className="hover:underline">Find a Store</Link>
-          <Link href="/" className="hover:underline">Help</Link>
-          <Link href="/" className="hover:underline">Join Us</Link>
+          <Link href="#" className="hover:underline">Find a Store</Link>
+          <Link href="#" className="hover:underline">Help</Link>
+          <Link href="#" className="hover:underline">Join Us</Link>
           <AuthBar />
         </div>
-        {config?.env && <MainNav config={config} />}
+        <MainNav config={config || {}} />
         <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
           <h1 className="text-3xl font-bold mb-8">Blog</h1>
           {loading ? (
@@ -72,9 +82,11 @@ export default function BlogListPage() {
             <ul className="space-y-8 list-none p-0 m-0">
               {blogs.map((blog) => {
                 const imageAsset = blog.image ?? {};
-                const imageSrc =
-                  imageAsset._dynamicUrl || imageAsset._authorUrl
-                    ? `${(config?.env || "").replace(/\/$/, "")}${imageAsset._dynamicUrl || imageAsset._authorUrl}`
+                const isAemImage = imageAsset._dynamicUrl || imageAsset._authorUrl;
+                const imageSrc = isAemImage
+                  ? `${(config?.env || "").replace(/\/$/, "")}${imageAsset._dynamicUrl || imageAsset._authorUrl}`
+                  : typeof blog.image === "string"
+                    ? blog.image
                     : null;
                 const href = blog.urlSlug ? `/blog/${blog.urlSlug}` : "#";
                 return (
