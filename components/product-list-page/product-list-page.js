@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpDown, Grid, List, Search, Loader2, Heart, Pencil } from "lucide-react";
@@ -629,8 +629,12 @@ export function ProductListPage({ content, config }) {
 
             {/* Product Grid / List */}
             <div className={productViewMode === "list" ? "product-list" : "product-grid"}>
-          {filteredProducts.map((product) => (
-            <Card key={product.sku} className={`product-card ${productViewMode === "list" ? "product-card-list" : ""}`}>
+          {filteredProducts.map((product, index) => (
+            <Fragment key={product.sku}>
+              {index === 8 && productViewMode === "grid" && (
+                <PlpCategoryCarousel />
+              )}
+              <Card className={`product-card ${productViewMode === "list" ? "product-card-list" : ""}`}>
               <CardContent className="product-card-content">
                 <div className="product-image-container product-card-image-wrap">
                   <Link
@@ -726,6 +730,7 @@ export function ProductListPage({ content, config }) {
                 </div>
               </CardContent>
             </Card>
+            </Fragment>
           ))}
         </div>
 
