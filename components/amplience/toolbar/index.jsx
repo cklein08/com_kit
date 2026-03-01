@@ -73,7 +73,7 @@ export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
   ].filter((i) => i.visible);
 
   return (
-    <div className="fixed top-[10%] right-0 z-50 flex">
+    <div className="fixed top-[20%] right-0 z-50 flex">
       <Button
         type="button"
         variant="outline"
