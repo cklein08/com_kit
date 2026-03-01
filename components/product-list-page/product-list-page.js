@@ -107,6 +107,7 @@ export function ProductListPage({ content, config }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState("featured");
+  const [productViewMode, setProductViewMode] = useState("grid");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
@@ -542,13 +543,23 @@ export function ProductListPage({ content, config }) {
               <div className="results-header-actions">
                 <div className="view-toggle">
                   <Button
-                    variant="outline"
+                    variant={productViewMode === "grid" ? "outline" : "ghost"}
                     size="sm"
-                    className="view-button bg-transparent"
+                    className="view-button"
+                    onClick={() => setProductViewMode("grid")}
+                    aria-label="Grid view"
+                    aria-pressed={productViewMode === "grid"}
                   >
                     <Grid className="view-icon" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="view-button">
+                  <Button
+                    variant={productViewMode === "list" ? "outline" : "ghost"}
+                    size="sm"
+                    className="view-button"
+                    onClick={() => setProductViewMode("list")}
+                    aria-label="List view"
+                    aria-pressed={productViewMode === "list"}
+                  >
                     <List className="view-icon" />
                   </Button>
                 </div>
@@ -596,10 +607,10 @@ export function ProductListPage({ content, config }) {
               </div>
             )}
 
-            {/* Product Grid */}
-            <div className="product-grid">
+            {/* Product Grid / List */}
+            <div className={productViewMode === "list" ? "product-list" : "product-grid"}>
           {filteredProducts.map((product) => (
-            <Card key={product.sku} className="product-card">
+            <Card key={product.sku} className={`product-card ${productViewMode === "list" ? "product-card-list" : ""}`}>
               <CardContent className="product-card-content">
                 <div className="product-image-container product-card-image-wrap">
                   <Link
@@ -647,21 +658,22 @@ export function ProductListPage({ content, config }) {
                     />
                   </button>
                 </div>
-                <Link
-                  href={`/product/${product.sku}`}
-                  className="product-card-link"
-                  tabIndex={0}
-                >
-                  <div className="product-info">
-                    <div className="product-header">
-                      <p className="product-category">
-                        {capitalize(product.category) || "No Category"}
-                      </p>
-                      <h3 className="product-name">{product.name}</h3>
+                <div className="product-card-main">
+                  <Link
+                    href={`/product/${product.sku}`}
+                    className="product-card-link"
+                    tabIndex={0}
+                  >
+                    <div className="product-info">
+                      <div className="product-header">
+                        <p className="product-category">
+                          {capitalize(product.category) || "No Category"}
+                        </p>
+                        <h3 className="product-name">{product.name}</h3>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-                <div className="price-container">
+                  </Link>
+                  <div className="price-container">
                     <div className="price-info">
                       <span className="current-price">
                         {product.price?.final == null
@@ -691,6 +703,7 @@ export function ProductListPage({ content, config }) {
                       Add to Cart
                     </Button>
                   </div>
+                </div>
               </CardContent>
             </Card>
           ))}
