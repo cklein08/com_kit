@@ -47,7 +47,7 @@ const FAKE_PRODUCTS = [
   {
     name: "Sleeveless Shell",
     price: { amount: { value: 47.36, currency: "GBP" } },
-    image: "https://images.unsplash.com/photo-1596723585967-8fb2df6e8f3d?w=80&h=80&fit=crop",
+    image: "https://edge.disstg.commercecloud.salesforce.com/dw/image/v2/ZZRF_001/on/demandware.static/-/Sites-apparel-m-catalog/default/dw84786754/images/large/PG.10235354.JJ5AAXX.PZ.jpg?sw=680&q=60",
     href: "/product/25593169M",
   },
 ];

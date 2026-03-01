@@ -52,6 +52,11 @@ const nextConfig = {
         hostname: "cdn.media.amplience.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "edge.disstg.commercecloud.salesforce.com",
+        pathname: "/**",
+      },
     ],
   },
 }
