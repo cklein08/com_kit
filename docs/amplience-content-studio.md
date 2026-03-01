@@ -117,6 +117,18 @@ The product list page (PLP) grid can be driven by Amplience content so authors c
 
 4. **Fallback:** If no content exists at the delivery key, the PLP falls back to search-driven behavior (products from the search input).
 
+## PDP Product Line (You might also like)
+
+The product detail page (PDP) "You might also like" section can be driven by Amplience content so authors can choose which products appear (search phrase, category, or a list of SKUs). When `?vse=` or `?cse=` is in the URL, a **pencil icon** appears next to the "You might also like" heading. Clicking it opens an **edit dialog** to configure the product line.
+
+1. **Content type:** Use the same schema as the Product Carousel / PLP Product Line: `productLineType`, `searchPhrase`, `category`, `skus`, `title` (optional).
+
+2. **Delivery key:** Create a content item and set its **delivery key** to `pdp/product-line/{SKU}`, where `{SKU}` is the product SKU in uppercase (e.g. `pdp/product-line/KOBE-VIII-PROTRO` for the Kobe VIII Protro product). For **Complete the look** use `pdp/product-line/{SKU}/cross-sell`; for **Upgrade for more** use `pdp/product-line/{SKU}/upsell`.
+
+3. **Edit affordance:** When the storefront is opened with `?vse=` in the URL (e.g. `http://localhost:3000/product/kobe-VIII-protro?vse=demo.staging.bigcontent.io`), pencils appear next to "You might also like", "Complete the look", and "Upgrade for more". Each opens an edit dialog for that section. The blog post has a pencil that links to the AEM editor for the product page. Authors can change the product line type, search phrase, category, or pick products from the catalog. Saving updates the Amplience content via the same CMA flow as the carousel and PLP.
+
+4. **Fallback:** If no content exists at the delivery key, the section shows default placeholder products.
+
 ## Storefront: PDP, home slot, and nav
 
 - **Home page:** The home route (`/`) is driven by **AEM** only (no override). To add an optional Amplience slot (e.g. `home/slot/top`), render `<AmplienceWrapper fetch={{ key: "home/slot/top" }} />` in `app/page.jsx` where you want it; use delivery key `home/slot/top` in Amplience.

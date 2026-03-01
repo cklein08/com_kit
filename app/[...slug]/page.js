@@ -215,7 +215,11 @@ export default function Page({ params }) {
           {isProductPath ? (
             <>
               {/* Existing: Adobe Commerce product data via ProductDetail */}
-              <ProductDetail variantData={productDetail} />
+              <ProductDetail
+                variantData={productDetail}
+                config={config}
+                productSlug={productSlug}
+              />
               {/* Amplience (from amplience-sfcc-composable-commerce): PDP content by key pdp/content/{SKU} */}
               {productPdp?.content?.map((item, i) => {
                 const id = item?._meta?.deliveryId ?? item?.id;

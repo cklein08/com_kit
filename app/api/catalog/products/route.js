@@ -26,6 +26,7 @@ export async function GET(request) {
   );
   const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
   const skusParam = searchParams.get("skus");
+  const categoryParam = searchParams.get("category");
   const includeFacets = searchParams.get("includeFacets") === "true";
 
   try {
@@ -46,27 +47,36 @@ export async function GET(request) {
             sku: p.sku,
             name: p.name,
             image: p.images?.[0]?.url,
+            price: p.price,
           })),
         });
       }
     }
 
+    const effectiveSearch = categoryParam?.trim() ? "" : search;
     const result = await searchProducts(
       CATALOG_VIEW_ID,
       DEFAULT_LOCALE,
       DEFAULT_PRICE_BOOK,
-      search,
-      pageSize,
-      page
+      effectiveSearch,
+      categoryParam?.trim() ? 200 : pageSize,
+      1
     );
 
+    let products = result.products;
+    if (categoryParam?.trim()) {
+      const cat = categoryParam.trim().toLowerCase();
+      products = products.filter((p) => (p.category || "").toLowerCase() === cat);
+    }
+
     const response = {
-      products: result.products.map((p) => ({
+      products: products.map((p) => ({
         sku: p.sku,
         name: p.name,
         image: p.images?.[0]?.url,
+        price: p.price,
       })),
-      totalCount: result.totalCount,
+      totalCount: categoryParam?.trim() ? products.length : result.totalCount,
     };
 
     if (includeFacets && result.products.length > 0) {
