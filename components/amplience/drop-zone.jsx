@@ -9,12 +9,12 @@ import { AddComponentDialog } from "@/components/amplience/add-component-dialog"
 
 /**
  * Drop zone for adding Amplience content when ?vse= is present.
- * When empty: shows "Add component" overlay; clicking opens component picker.
- * When has content: shows subtle "Edit" affordance.
+ * When empty: shows "Add component" above; pencil links to editUrl (AEM or catalog).
+ * When has content: AmplienceWrapper provides pencil to Content Studio.
  *
- * @param {{ slotKey: string, label?: string, isEmpty: boolean, children: React.ReactNode, className?: string }} props
+ * @param {{ slotKey: string, label?: string, isEmpty: boolean, children: React.ReactNode, className?: string, editUrl?: string }} props
  */
-export function DropZone({ slotKey, label, isEmpty, children, className = "" }) {
+export function DropZone({ slotKey, label, isEmpty, children, className = "", editUrl }) {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
@@ -31,27 +31,64 @@ export function DropZone({ slotKey, label, isEmpty, children, className = "" }) 
     >
       {isEmpty ? (
         <>
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => setAddDialogOpen(true)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setAddDialogOpen(true);
-              }
-            }}
-            className="flex min-h-[60px] cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-zinc-300 bg-zinc-50/50 transition hover:border-zinc-400 hover:bg-zinc-100/80"
-          >
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 text-zinc-600 hover:text-zinc-900 pointer-events-none"
+          {children ? (
+            <>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setAddDialogOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setAddDialogOpen(true);
+                  }
+                }}
+                className="mb-2 flex cursor-pointer items-center justify-end"
+              >
+                <span className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-600 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-900">
+                  <Plus className="h-4 w-4" />
+                  Add component
+                </span>
+              </div>
+              <div className="relative">
+                {children}
+                {editUrl && (
+                  <a
+                    href={editUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Edit ${label || "content"}`}
+                    aria-label={`Edit ${label || "content"}`}
+                    className="absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-600 shadow-sm transition hover:bg-zinc-50 hover:text-zinc-900"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+            </>
+          ) : (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setAddDialogOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setAddDialogOpen(true);
+                }
+              }}
+              className="flex min-h-[60px] cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-zinc-300 bg-zinc-50/50 transition hover:border-zinc-400 hover:bg-zinc-100/80"
             >
-              <Plus className="h-4 w-4" />
-              Add component
-            </Button>
-          </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 text-zinc-600 hover:text-zinc-900 pointer-events-none"
+              >
+                <Plus className="h-4 w-4" />
+                Add component
+              </Button>
+            </div>
+          )}
           <AddComponentDialog
             open={addDialogOpen}
             onOpenChange={setAddDialogOpen}
@@ -76,14 +113,17 @@ export function DropZone({ slotKey, label, isEmpty, children, className = "" }) 
 
 /**
  * Fetches Amplience content by slot key and renders DropZone + AmplienceWrapper.
- * When no content: shows empty drop zone (when ?vse=) or placeholder. When content exists: renders it with edit affordance.
+ * When no content: shows placeholder with Add component; pencil links to editUrl (AEM).
+ * When content exists: AmplienceWrapper provides pencil to Content Studio (catalog).
  * Supports fallbackKey: tries primary key first, then fallback if null.
  *
- * @param {{ slotKey: string, fallbackKey?: string, label?: string, className?: string, placeholder?: React.ReactNode }} props
+ * @param {{ slotKey: string, fallbackKey?: string, label?: string, className?: string, placeholder?: React.ReactNode, editUrl?: string }} props
  */
-export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", placeholder }) {
+export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", placeholder, editUrl }) {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const vse = searchParams.get("vse") || searchParams.get("cse");
 
   const cancelledRef = useRef(false);
 
@@ -157,17 +197,31 @@ export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", pla
   }
 
   if (!content) {
-    return placeholder ? <div className={className}>{placeholder}</div> : null;
+    if (!placeholder) return null;
+    if (vse) {
+      return (
+        <DropZone
+          slotKey={slotKey}
+          label={label}
+          isEmpty
+          className={className}
+          editUrl={editUrl}
+        >
+          {placeholder}
+        </DropZone>
+      );
+    }
+    return <div className={className}>{placeholder}</div>;
   }
 
   return (
     <DropZone
       slotKey={slotKey}
       label={label}
-      isEmpty={!content}
+      isEmpty={false}
       className={className}
     >
-      {content ? <AmplienceWrapper content={content} /> : null}
+      <AmplienceWrapper content={content} />
     </DropZone>
   );
 }

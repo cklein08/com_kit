@@ -616,6 +616,7 @@ export function ProductListPage({ content, config }) {
                   slotKey={plpBannerKey}
                   fallbackKey={plpBannerKey !== "plp/slot/top" ? "plp/slot/top" : undefined}
                   label="Banner"
+                  editUrl={showPencil ? aemEditorUrl : null}
                   placeholder={
                     <PlpBanner
                       headline="New Season"
