@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpDown, Grid, List, Search, Loader2, Heart } from "lucide-react";
+import { ArrowUpDown, Grid, List, Search, Loader2, Heart, Pencil } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { searchProducts, computeFacetsFromProducts, filterProductsByFacets } from "@/lib/api/plp";
+import { searchProducts, getProductsBySkus, computeFacetsFromProducts, filterProductsByFacets } from "@/lib/api/plp";
 import {
   CATALOG_VIEW_ID,
   DEFAULT_LOCALE,
@@ -35,10 +36,23 @@ import { useAuth } from "@/contexts/auth-context";
 import { useWishlist } from "@/contexts/wishlist-context";
 import { useLoginRequired } from "@/contexts/login-required-context";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ProductLineEditForm } from "@/components/product-line-edit-form/product-line-edit-form";
 
 import "./product-list-page.css";
 
 const PAGE_SIZE = 25;
+const CATEGORY_FETCH_SIZE = 500;
+
+const hasCategory = (p) => {
+  const cat = (p.category || "").trim().toLowerCase();
+  return cat !== "" && cat !== "no category";
+};
 
 const formatPrice = (priceType) => {
   if (
@@ -73,6 +87,16 @@ const showDiscount = (price, globalPrice = null) => {
 };
 
 export function ProductListPage({ content, config }) {
+  const searchParams = useSearchParams();
+  const vse = searchParams.get("vse") || searchParams.get("cse");
+  const aemEditorUrl =
+    vse &&
+    config?.env &&
+    content?._path
+      ? `${config.env.replace(/\/$/, "")}/editor.html${content._path.startsWith("/") ? content._path : `/${content._path}`}`
+      : null;
+  const showPencil = !!vse && !!aemEditorUrl;
+
   const cart = useCart();
   const { user } = useAuth();
   const wishlist = useWishlist();
@@ -91,22 +115,138 @@ export function ProductListPage({ content, config }) {
     useState(DEFAULT_PRICE_BOOK);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [plpBannerKey, setPlpBannerKey] = useState(null);
+  const [plpProductLineKey, setPlpProductLineKey] = useState(null);
+  const [productLineContent, setProductLineContent] = useState(null);
+  const [productLineProducts, setProductLineProducts] = useState([]);
+  const [editProductLineDialogOpen, setEditProductLineDialogOpen] = useState(false);
 
-  // Derive PLP banner delivery key from content path (e.g. plp/new-arrivals/slot/top or plp/slot/top)
+  const refetchProductLine = useCallback(() => {
+    if (!plpProductLineKey) return;
+    const params = new URLSearchParams({ key: plpProductLineKey });
+    if (vse) params.set("vse", vse);
+    params.set("locale", "en-US");
+    params.set("_t", Date.now().toString());
+    fetch(`/api/amplience/content?${params}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && (data._meta || data.productLineType !== undefined || data.searchPhrase !== undefined || Array.isArray(data.skus))) {
+          setProductLineContent(data);
+        } else {
+          setProductLineContent(null);
+        }
+      })
+      .catch(() => setProductLineContent(null));
+  }, [plpProductLineKey, vse]);
+
+  // Derive PLP banner and product line delivery keys from content path
   useEffect(() => {
     const path = content?._path;
     if (!path) {
       setPlpBannerKey("plp/slot/top");
+      setPlpProductLineKey("plp/product-line");
       return;
     }
     const segments = path.split("/").filter(Boolean);
     const lastSegment = segments[segments.length - 1];
     if (lastSegment && lastSegment !== "home") {
       setPlpBannerKey(`plp/${lastSegment}/slot/top`);
+      setPlpProductLineKey(`plp/${lastSegment}/product-line`);
     } else {
       setPlpBannerKey("plp/slot/top");
+      setPlpProductLineKey("plp/product-line");
     }
   }, [content?._path]);
+
+  // Fetch product line config from Amplience (drives which products appear in grid)
+  useEffect(() => {
+    refetchProductLine();
+  }, [refetchProductLine]);
+
+  // Fetch full product list for category/skuList modes (cached for client-side pagination)
+  useEffect(() => {
+    const config = productLineContent;
+    const type = config?.productLineType;
+    if (!config || (type !== "category" && type !== "skuList")) {
+      setProductLineProducts([]);
+      return;
+    }
+    let cancelled = false;
+    if (type === "skuList") {
+      const skus = Array.isArray(config.skus) ? config.skus : [];
+      if (skus.length === 0) {
+        setProductLineProducts([]);
+        return;
+      }
+      const fetchSkus = async () => {
+        if (selectedPriceBook === DEFAULT_PRICE_BOOK) {
+          const list = await getProductsBySkus(
+            skus,
+            CATALOG_VIEW_ID,
+            DEFAULT_LOCALE,
+            selectedPriceBook
+          );
+          const bySku = new Map(list.map((p) => [p.sku, p]));
+          const ordered = skus.map((sku) => bySku.get(sku)).filter(Boolean);
+          if (!cancelled) setProductLineProducts(ordered);
+        } else {
+          const [selectedList, globalList] = await Promise.all([
+            getProductsBySkus(skus, CATALOG_VIEW_ID, DEFAULT_LOCALE, selectedPriceBook),
+            getProductsBySkus(skus, CATALOG_VIEW_ID, DEFAULT_LOCALE, DEFAULT_PRICE_BOOK),
+          ]);
+          const globalMap = new Map(globalList.map((p) => [p.sku, p]));
+          const bySku = new Map(selectedList.map((p) => [p.sku, p]));
+          const ordered = skus.map((sku) => {
+            const p = bySku.get(sku);
+            if (!p) return null;
+            const globalP = globalMap.get(sku);
+            return { ...p, globalPrice: globalP?.price || null };
+          }).filter(Boolean);
+          if (!cancelled) setProductLineProducts(ordered);
+        }
+      };
+      fetchSkus();
+      return () => { cancelled = true; };
+    }
+    if (type === "category") {
+      const cat = (config.category || "").trim().toLowerCase();
+      if (!cat) {
+        setProductLineProducts([]);
+        return;
+      }
+      const fetchCategory = async () => {
+        if (selectedPriceBook === DEFAULT_PRICE_BOOK) {
+          const result = await searchProducts(
+            CATALOG_VIEW_ID,
+            DEFAULT_LOCALE,
+            selectedPriceBook,
+            "",
+            CATEGORY_FETCH_SIZE,
+            1
+          );
+          const filtered = (result.products || []).filter(
+            (p) => (p.category || "").toLowerCase() === cat
+          );
+          if (!cancelled) setProductLineProducts(filtered);
+        } else {
+          const [selectedResult, globalResult] = await Promise.all([
+            searchProducts(CATALOG_VIEW_ID, DEFAULT_LOCALE, selectedPriceBook, "", CATEGORY_FETCH_SIZE, 1),
+            searchProducts(CATALOG_VIEW_ID, DEFAULT_LOCALE, DEFAULT_PRICE_BOOK, "", CATEGORY_FETCH_SIZE, 1),
+          ]);
+          const globalMap = new Map((globalResult.products || []).map((p) => [p.sku, p]));
+          const filtered = (selectedResult.products || []).filter(
+            (p) => (p.category || "").toLowerCase() === cat
+          );
+          const merged = filtered.map((p) => ({
+            ...p,
+            globalPrice: globalMap.get(p.sku)?.price || null,
+          }));
+          if (!cancelled) setProductLineProducts(merged);
+        }
+      };
+      fetchCategory();
+      return () => { cancelled = true; };
+    }
+  }, [productLineContent, selectedPriceBook]);
 
   // Debounce search term
   useEffect(() => {
@@ -117,31 +257,68 @@ export function ProductListPage({ content, config }) {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  const plpConfig = productLineContent
+    ? {
+        productLineType: productLineContent.productLineType || "search",
+        searchPhrase: productLineContent.searchPhrase || "",
+        category: (productLineContent.category || "").trim().toLowerCase(),
+        skus: Array.isArray(productLineContent.skus) ? productLineContent.skus : [],
+      }
+    : null;
+
   const loadProducts = useCallback(
     async (page = 1, append = false) => {
       try {
         let products, totalCount;
 
+        // Category or skuList: use cached productLineProducts, filter by search, paginate client-side
+        if (plpConfig && (plpConfig.productLineType === "category" || plpConfig.productLineType === "skuList")) {
+          const withCategory = productLineProducts.filter(hasCategory);
+          const searchLower = debouncedSearchTerm.trim().toLowerCase();
+          const filtered = searchLower
+            ? withCategory.filter(
+                (p) =>
+                  (p.name || "").toLowerCase().includes(searchLower) ||
+                  (p.sku || "").toLowerCase().includes(searchLower)
+              )
+            : withCategory;
+          totalCount = filtered.length;
+          products = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+          if (append) {
+            setProducts((prev) => [...prev, ...products]);
+          } else {
+            setProducts(products);
+          }
+          setTotalCount(totalCount);
+          setCurrentPage(page);
+          return;
+        }
+
+        // Search type (from config or no config): use searchProducts API
+        const effectivePhrase =
+          plpConfig && plpConfig.productLineType === "search"
+            ? (plpConfig.searchPhrase + " " + debouncedSearchTerm).trim() || plpConfig.searchPhrase
+            : debouncedSearchTerm;
+
         if (selectedPriceBook === DEFAULT_PRICE_BOOK) {
-          // Single call for global price book
           const result = await searchProducts(
             CATALOG_VIEW_ID,
             DEFAULT_LOCALE,
             selectedPriceBook,
-            debouncedSearchTerm,
+            effectivePhrase,
             PAGE_SIZE,
             page
           );
-          products = result.products;
+          products = (result.products || []).filter(hasCategory);
           totalCount = result.totalCount;
         } else {
-          // Dual call: get selected price book data and global price book data to show strikethrough price
           const [selectedResult, globalResult] = await Promise.all([
             searchProducts(
               CATALOG_VIEW_ID,
               DEFAULT_LOCALE,
               selectedPriceBook,
-              debouncedSearchTerm,
+              effectivePhrase,
               PAGE_SIZE,
               page
             ),
@@ -149,27 +326,24 @@ export function ProductListPage({ content, config }) {
               CATALOG_VIEW_ID,
               DEFAULT_LOCALE,
               DEFAULT_PRICE_BOOK,
-              debouncedSearchTerm,
+              effectivePhrase,
               PAGE_SIZE,
               page
             ),
           ]);
-
-          // Merge the results by SKU, adding global price to each product
           const globalProductsMap = new Map(
             globalResult.products.map((product) => [product.sku, product])
           );
-
-          products = selectedResult.products.map((product) => ({
+          const merged = selectedResult.products.map((product) => ({
             ...product,
             globalPrice: globalProductsMap.get(product.sku)?.price || null,
           }));
-
+          products = merged.filter(hasCategory);
           totalCount = selectedResult.totalCount;
         }
 
         if (append) {
-          setProducts((prevProducts) => [...prevProducts, ...products]);
+          setProducts((prev) => [...prev, ...products]);
         } else {
           setProducts(products);
         }
@@ -179,12 +353,17 @@ export function ProductListPage({ content, config }) {
         console.error("Error loading products:", error);
       }
     },
-    [debouncedSearchTerm, selectedPriceBook]
+    [
+      debouncedSearchTerm,
+      selectedPriceBook,
+      plpConfig,
+      productLineProducts,
+    ]
   );
 
   useEffect(() => {
     loadProducts(1, false);
-  }, [debouncedSearchTerm, selectedPriceBook, CATALOG_VIEW_ID]);
+  }, [loadProducts]);
 
   const handleLoadMore = async () => {
     setIsLoadingMore(true);
@@ -204,6 +383,35 @@ export function ProductListPage({ content, config }) {
   });
 
   const hasMoreProducts = products.length < totalCount;
+
+  const productLineContentId =
+    productLineContent?.id ??
+    productLineContent?.deliveryId ??
+    productLineContent?._meta?.deliveryId ??
+    productLineContent?.sys?.id;
+  const productLineConfig = productLineContent
+    ? {
+        productLineType: productLineContent.productLineType || "search",
+        searchPhrase: productLineContent.searchPhrase,
+        category: productLineContent.category,
+        skus: Array.isArray(productLineContent.skus) ? productLineContent.skus : undefined,
+      }
+    : undefined;
+  const showProductLinePencil = !!vse && !!plpProductLineKey;
+
+  const handleProductLineSave = async (payload) => {
+    if (!productLineContentId) return;
+    const res = await fetch("/api/amplience/content/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contentId: productLineContentId, ...payload }),
+    });
+    const errBody = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(errBody.error || `Save failed (${res.status})`);
+    }
+    refetchProductLine();
+  };
 
   const editorProps = {
     'data-aue-resource': `urn:aemconnection:${content?._path}/jcr:content/data/${content?._variation}`,
@@ -288,6 +496,19 @@ export function ProductListPage({ content, config }) {
                   ))}
                 </SelectContent>
               </Select>
+
+              {showPencil && (
+                <a
+                  href={aemEditorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Edit product list"
+                  className="plp-edit-pencil"
+                  aria-label="Edit product list"
+                >
+                  <Pencil className="h-4 w-4" />
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -295,13 +516,6 @@ export function ProductListPage({ content, config }) {
 
       {/* Results and View Toggle */}
       <div className="main-content">
-        {/* Amplience banner slot above results count */}
-        {plpBannerKey && (
-          <div className="plp-banner-slot">
-            <AmplienceWrapper fetch={{ key: plpBannerKey }} />
-          </div>
-        )}
-
         <div className="plp-layout">
           {/* Left: Facet filters */}
           <PlpFacets
@@ -325,19 +539,62 @@ export function ProductListPage({ content, config }) {
                 <span className="font-medium">{totalCount}</span> results
               </p>
 
-              <div className="view-toggle">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="view-button bg-transparent"
-                >
-                  <Grid className="view-icon" />
-                </Button>
-                <Button variant="ghost" size="sm" className="view-button">
-                  <List className="view-icon" />
-                </Button>
+              <div className="results-header-actions">
+                <div className="view-toggle">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="view-button bg-transparent"
+                  >
+                    <Grid className="view-icon" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="view-button">
+                    <List className="view-icon" />
+                  </Button>
+                </div>
+                {showProductLinePencil && (
+                  <button
+                    type="button"
+                    onClick={() => setEditProductLineDialogOpen(true)}
+                    title="Edit product line (catalog)"
+                    className="plp-edit-pencil"
+                    aria-label="Edit product line"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </div>
+
+            <Dialog open={editProductLineDialogOpen} onOpenChange={setEditProductLineDialogOpen}>
+              <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Edit product line</DialogTitle>
+                </DialogHeader>
+                {!productLineContentId && (
+                  <p className="text-sm text-muted-foreground">
+                    Create content in Amplience with delivery key &quot;{plpProductLineKey}&quot; to enable saving.
+                  </p>
+                )}
+                <ProductLineEditForm
+                  initialConfig={productLineConfig}
+                  contentId={productLineContentId}
+                  onSave={handleProductLineSave}
+                  onClose={() => setEditProductLineDialogOpen(false)}
+                  showTitle={false}
+                  defaultTitle={content?.title || "PLP Product Line"}
+                  saveSuccessMessage="Product line updated"
+                  noContentMessage={`Create content in Amplience with delivery key "${plpProductLineKey}" to enable saving.`}
+                />
+              </DialogContent>
+            </Dialog>
+
+            {/* Amplience banner slot just above product grid */}
+            {plpBannerKey && (
+              <div className="plp-banner-slot">
+                <AmplienceWrapper fetch={{ key: plpBannerKey }} />
+              </div>
+            )}
 
             {/* Product Grid */}
             <div className="product-grid">

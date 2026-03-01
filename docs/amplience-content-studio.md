@@ -100,6 +100,23 @@ The home page can show a **product carousel** driven by Amplience content so aut
    - *"Cannot save: no carousel content found"* — Create a Product Carousel content item in Amplience Content Studio and set its delivery key to `home/carousel`.
    - *"Content item not found"* — The carousel content may have been deleted, or the delivery ID from the Content Delivery API may not match the CMA content item ID (ensure Content Delivery 2 is enabled on your hub).
 
+## PLP Product Line (product list page)
+
+The product list page (PLP) grid can be driven by Amplience content so authors can choose which products appear (search phrase, category, or a list of SKUs). When `?vse=` or `?cse=` is in the URL, a **pencil icon** appears next to the grid/list view toggle. Clicking it opens an **edit dialog** to configure the product line.
+
+1. **Content type:** Use the same schema as the Product Carousel (or create a **PLP Product Line** content type) with these fields:
+   - **productLineType** (enum: `search` | `category` | `skuList`)
+   - **searchPhrase** (string) — used when productLineType is `search`
+   - **category** (string) — used when productLineType is `category` (matches product `item_category`)
+   - **skus** (array of strings) — used when productLineType is `skuList`
+   - **title** (string, optional) — not displayed; used for API payload
+
+2. **Delivery key:** Create a content item and set its **delivery key** to `plp/{slug}/product-line`, where `{slug}` is the PLP path segment (e.g. `plp/new-arrivals/product-line` for the New Arrivals PLP). For a generic PLP, use `plp/product-line`.
+
+3. **Edit affordance:** When the storefront is opened with `?vse=` in the URL (e.g. `http://localhost:3000/plp/new-arrivals?vse=your-hub.staging.bigcontent.io`), the pencil next to the grid toggle opens the edit dialog. Authors can change the product line type, search phrase, category, or pick products from the catalog. Saving updates the Amplience content via the same CMA flow as the carousel. Requires `AMPLIENCE_CLIENT_ID` and `AMPLIENCE_CLIENT_SECRET`.
+
+4. **Fallback:** If no content exists at the delivery key, the PLP falls back to search-driven behavior (products from the search input).
+
 ## Storefront: PDP, home slot, and nav
 
 - **Home page:** The home route (`/`) is driven by **AEM** only (no override). To add an optional Amplience slot (e.g. `home/slot/top`), render `<AmplienceWrapper fetch={{ key: "home/slot/top" }} />` in `app/page.jsx` where you want it; use delivery key `home/slot/top` in Amplience.
