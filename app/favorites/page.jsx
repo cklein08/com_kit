@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 
 export default function FavoritesPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, authenticated, signIn } = useAuth();
   const { items, removeItem } = useWishlist();
   const [config, setConfig] = useState(null);
 
@@ -43,7 +43,7 @@ export default function FavoritesPage() {
         <h1 className="text-2xl font-bold mb-6">Favorites</h1>
         {loading ? (
           <p className="text-muted-foreground">Loading…</p>
-        ) : !user ? (
+        ) : !authenticated ? (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
             <p className="text-muted-foreground mb-4">
               You must be logged in to view your favorites.

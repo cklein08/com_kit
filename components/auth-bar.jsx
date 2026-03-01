@@ -3,7 +3,7 @@
 import { useAuth } from "@/contexts/auth-context";
 
 export function AuthBar() {
-  const { user, loading, signIn, signOut } = useAuth();
+  const { user, loading, authenticated, signIn, signOut } = useAuth();
 
   if (loading) {
     return (
@@ -13,11 +13,11 @@ export function AuthBar() {
     );
   }
 
-  if (user) {
+  if (authenticated) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm truncate max-w-[120px]" title={user.email}>
-          {user.name || user.email || "Signed in"}
+        <span className="text-sm truncate max-w-[120px]" title={user?.email}>
+          {user?.name || user?.email || "Signed in"}
         </span>
         <button
           type="button"

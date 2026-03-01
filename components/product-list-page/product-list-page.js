@@ -101,7 +101,7 @@ export function ProductListPage({ content, config }) {
   const showPencil = !!vse && !!aemEditorUrl;
 
   const cart = useCart();
-  const { user } = useAuth();
+  const { authenticated } = useAuth();
   const wishlist = useWishlist();
   const { showLoginRequiredForFavorites } = useLoginRequired();
   const [searchTerm, setSearchTerm] = useState("");
@@ -678,7 +678,7 @@ export function ProductListPage({ content, config }) {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (!user) {
+                      if (!authenticated) {
                         showLoginRequiredForFavorites();
                       } else {
                         const wasInWishlist = wishlist.isInWishlist(product.sku);

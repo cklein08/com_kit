@@ -55,7 +55,7 @@ export function ProductDetail({ variantData, config, productSlug }) {
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
   const cart = useCart();
-  const { user } = useAuth();
+  const { user, authenticated } = useAuth();
   const wishlist = useWishlist();
   const { showLoginRequiredForFavorites } = useLoginRequired();
   const [selectedSize, setSelectedSize] = useState(null);
@@ -548,7 +548,7 @@ export function ProductDetail({ variantData, config, productSlug }) {
               size="lg"
               className="product-detail-add-to-favorites"
               onClick={() => {
-                if (!user) {
+                if (!authenticated) {
                   showLoginRequiredForFavorites();
                 } else {
                   const wasInWishlist = wishlist.isInWishlist(product.sku);

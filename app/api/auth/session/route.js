@@ -37,11 +37,12 @@ export async function GET(request) {
   const session = getSessionFromCookie(cookieHeader);
 
   if (!session) {
-    const signInUrl = process.env.CLOUDFLARE_AUTH === 'true'
-      ? '/auth/login'
-      : isEntraConfigured()
-        ? '/api/auth/entra/login'
-        : '/api/auth/adobe';
+    const signInUrl =
+      process.env.CLOUDFLARE_AUTH === 'true'
+        ? '/auth/login'
+        : isEntraConfigured()
+          ? '/api/auth/entra/login'
+          : '/api/auth/adobe';
     return NextResponse.json({
       user: null,
       signInUrl,

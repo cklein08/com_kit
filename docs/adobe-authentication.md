@@ -44,6 +44,33 @@ Implementation depends on your deployment (AEM, Edge, etc.) and how Adobe inject
 
 ## Current behavior in this app
 
-- **Sign in**: Uses Adobe IMS OAuth (same as AEM author). Redirects to IMS authorize, then callback exchanges the code for tokens and userinfo and sets a session cookie. When Microsoft Entra is configured, it is preferred over Adobe (see [microsoft-entra-authentication.md](microsoft-entra-authentication.md)).
-- **Session**: Stored in an HTTP-only signed cookie (`lib/auth/session.js`). Includes user (name, email, sub, account_type) and tokens (access_token, refresh_token, expires_at) for optional API use.
+The app supports multiple auth methods (like [awesomeportal](https://github.com/Adobe/awesomeportal)):
+
+### Adobe IMS implicit flow (client-side)
+
+When `NEXT_PUBLIC_ADOBE_CLIENT_ID` is set:
+
+- **Sign in**: Redirects to IMS with `response_type=token` (implicit flow). Token returned in URL hash.
+- **Token storage**: `localStorage.accessToken` (value: `Bearer <token>`) and `localStorage.tokenExpiresAt`.
+- **Silent refresh**: Hidden iframe with `prompt=none` ~5 minutes before expiry.
+- **Profile**: Fetched from `/api/auth/ims/profile` (proxy to IMS userinfo).
+- **Sign out**: Clears localStorage and redirects to `/`.
+
+**Required env:** `NEXT_PUBLIC_ADOBE_CLIENT_ID` (no client secret).  
+**Redirect URI** in Adobe Console: `https://your-domain/*` or `https://localhost:3000/*` (pattern for implicit flow).
+
+### Adobe IMS auth code flow (server-side)
+
+When `ADOBE_CLIENT_ID` and `ADOBE_CLIENT_SECRET` are set (and implicit not preferred):
+
+- **Sign in**: Redirects to IMS, callback at `/api/auth/adobe/callback` exchanges code for tokens.
+- **Session**: HTTP-only signed cookie (`lib/auth/session.js`).
 - **Sign out**: POST or GET `/api/auth/signout` clears the session cookie.
+
+### Cookie auth (fallback)
+
+When running on `*.workers.dev` or `http://localhost:8787`, the user is considered authenticated without a token (session handled by the host).
+
+### Microsoft Entra / Cloudflare
+
+See [microsoft-entra-authentication.md](microsoft-entra-authentication.md) and [cloudflare-authentication.md](cloudflare-authentication.md).

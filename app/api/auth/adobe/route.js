@@ -16,13 +16,10 @@ export function GET(request) {
   const orgId = process.env.ADOBE_IMS_ORG_ID;
 
   if (!clientId) {
-    return NextResponse.json(
-      {
-        error:
-          'Adobe IMS not configured. Set ADOBE_CLIENT_ID and ADOBE_CLIENT_SECRET (see docs/adobe-authentication.md).',
-      },
-      { status: 500 }
-    );
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+    const errorUrl = new URL('/', baseUrl);
+    errorUrl.searchParams.set('auth_error', 'not_configured');
+    return NextResponse.redirect(errorUrl);
   }
 
   const state = crypto.randomUUID();

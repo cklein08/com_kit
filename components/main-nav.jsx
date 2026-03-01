@@ -238,7 +238,7 @@ export function MainNav({ config, locale = 'en' }) {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false)
   const [activeMegaMenu, setActiveMegaMenu] = useState(null) // To track which mega menu is open
   const [content, setContent] = useState([]);
-  const { user } = useAuth();
+  const { authenticated } = useAuth();
   const { itemCount } = useWishlist();
   const { itemCount: cartItemCount } = useCart();
   const { showLoginRequiredForFavorites } = useLoginRequired();
@@ -302,7 +302,7 @@ export function MainNav({ config, locale = 'en' }) {
           <Search className="search-icon" />
           <input type="text" placeholder="Search" className="search-input" />
         </div>
-        {user ? (
+        {authenticated ? (
           <Link
             href="/favorites"
             className="relative inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent hover:text-accent-foreground"
