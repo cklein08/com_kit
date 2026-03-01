@@ -100,6 +100,28 @@ The home page can show a **product carousel** driven by Amplience content so aut
    - *"Cannot save: no carousel content found"* — Create a Product Carousel content item in Amplience Content Studio and set its delivery key to `home/carousel`.
    - *"Content item not found"* — The carousel content may have been deleted, or the delivery ID from the Content Delivery API may not match the CMA content item ID (ensure Content Delivery 2 is enabled on your hub).
 
+## PLP Banner (product list page)
+
+The PLP displays an **Amplience banner slot** just above the product grid (similar to the "New Seasons" banner on reference storefronts). Authors can create promotional banners per category or a global banner for all PLPs.
+
+1. **Content type:** Create a content type in Amplience using the [tutorial banner schema](https://amplience.com/developers/docs/schema-reference/schema-examples/tutorials/banner/) (`https://schema-examples.com/tutorial-banner`). It includes:
+   - **headline** (string) — main title
+   - **strapline** (string) — subtitle
+   - **background** (object) — `image` (image-link) and `alt` text
+   - **link** (object) — `url` and `title` for the call-to-action button
+
+2. **Delivery keys:**
+   - **Category-specific:** `plp/{slug}/slot/top` — e.g. `plp/new-arrivals/slot/top` for the New Arrivals PLP at `/content/dam/v0/site/en/new-arrivals/new-arrivals`
+   - **Global fallback:** `plp/slot/top` — used when no category-specific banner exists
+
+3. **Fallback:** If no content exists at the category-specific key (e.g. `plp/new-arrivals/slot/top`), the storefront automatically tries the global key `plp/slot/top`.
+
+4. **Visualization URL:** In the content type's Visualizations tab, set:
+   ```
+   {{NEXT_PUBLIC_APP_URL}}/visualization/{{hub.name}}/{{content.sys.id}}?vse={{vse.domain}}
+   ```
+   so authors can edit the banner in Content Studio and see the storefront preview.
+
 ## PLP Product Line (product list page)
 
 The product list page (PLP) grid can be driven by Amplience content so authors can choose which products appear (search phrase, category, or a list of SKUs). When `?vse=` or `?cse=` is in the URL, a **pencil icon** appears next to the grid/list view toggle. Clicking it opens an **edit dialog** to configure the product line.

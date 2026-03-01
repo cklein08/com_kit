@@ -31,7 +31,9 @@ import {
 import { capitalize } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
 import { AmplienceWrapper } from "@/components/amplience/wrapper";
+import { PlpBanner } from "@/components/amplience/plp-banner";
 import { PlpFacets } from "./plp-facets";
+import { PlpCategoryCarousel } from "./plp-category-carousel";
 import { useAuth } from "@/contexts/auth-context";
 import { useWishlist } from "@/contexts/wishlist-context";
 import { useLoginRequired } from "@/contexts/login-required-context";
@@ -600,10 +602,28 @@ export function ProductListPage({ content, config }) {
               </DialogContent>
             </Dialog>
 
-            {/* Amplience banner slot just above product grid */}
+            {/* Amplience banner slot just above product grid (e.g. "New Seasons" banner) */}
             {plpBannerKey && (
               <div className="plp-banner-slot">
-                <AmplienceWrapper fetch={{ key: plpBannerKey }} />
+                <AmplienceWrapper
+                  fetch={{
+                    key: plpBannerKey,
+                    fallbackKey: plpBannerKey !== "plp/slot/top" ? "plp/slot/top" : undefined,
+                  }}
+                  placeholder={
+                    <PlpBanner
+                      headline="New Season"
+                      strapline="Discover the latest arrivals"
+                      background={{
+                        image: {
+                          url: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&q=80",
+                        },
+                        alt: "New Season fashion",
+                      }}
+                      link={{ url: "/", title: "Shop Now" }}
+                    />
+                  }
+                />
               </div>
             )}
 

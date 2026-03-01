@@ -47,6 +47,11 @@ const nextConfig = {
         hostname: "author-p124903-e1367755.adobeaemcloud.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.media.amplience.net",
+        pathname: "/**",
+      },
     ],
   },
 }

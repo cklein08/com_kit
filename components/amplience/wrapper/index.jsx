@@ -3,8 +3,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { RunningShoesCarousel } from "@/components/running-shoes-carousel/running-shoes-carousel";
+import { PlpBanner } from "@/components/amplience/plp-banner";
 import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
 import { AMPLIENCE_HUB, AMPLIENCE_APP_URL } from "@/lib/constants";
+
+/**
+ * Schema URI for Product Carousel content type in Amplience.
+ */
+export const PRODUCT_CAROUSEL_SCHEMA =
+  "https://amplience.com/components/product-carousel";
+
+/**
+ * Schema URI for Amplience tutorial banner (PLP banner, hero-style).
+ * @see https://amplience.com/developers/docs/schema-reference/schema-examples/tutorials/banner/
+ */
+export const TUTORIAL_BANNER_SCHEMA = "https://schema-examples.com/tutorial-banner";
 
 /**
  * Renders Product Carousel content from Amplience (for visualization page).
@@ -21,19 +34,13 @@ function ProductCarouselFromContent(content) {
 }
 
 /**
- * Schema URI for Product Carousel content type in Amplience.
- * Set this in your Amplience content type schema.
- */
-export const PRODUCT_CAROUSEL_SCHEMA =
-  "https://amplience.com/components/product-carousel";
-
-/**
  * Maps Amplience content type schema URI to React component.
  * Add entries as you add content types (hero, banner, etc.).
  * @see https://github.com/amplience/amplience-sfcc-composable-commerce/blob/main/docs/amplience/amplience-components-list.md
  */
 const DEFAULT_COMPONENTS = {
   [PRODUCT_CAROUSEL_SCHEMA]: ProductCarouselFromContent,
+  [TUTORIAL_BANNER_SCHEMA]: PlpBanner,
 };
 
 /**
@@ -49,9 +56,10 @@ function buildVisualizationUrl(contentId, hub, vse) {
 /**
  * Renders Amplience content by schema. Pass either pre-fetched content or fetch by id/key.
  * When ?vse= or ?cse= is in the URL, shows a pencil edit button linking to Content Studio visualization.
- * @param {{ content?: object, fetch?: { id?: string, key?: string }, components?: Record<string, React.ComponentType> }} props
+ * When fetch returns no content and placeholder is provided, renders the placeholder (e.g. demo banner).
+ * @param {{ content?: object, fetch?: { id?: string, key?: string, fallbackKey?: string }, components?: Record<string, React.ComponentType>, placeholder?: React.ReactNode }} props
  */
-export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, components = {} }) {
+export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, components = {}, placeholder }) {
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
   const hub = searchParams.get("hub") || searchParams.get("hubname") || AMPLIENCE_HUB;
@@ -59,18 +67,52 @@ export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, compo
   const [content, setContent] = useState(contentProp);
   const [loading, setLoading] = useState(!!fetchProp && !contentProp);
 
-  // Client-side fetch by id or key when fetch prop is provided (via API route)
+  // Client-side fetch by id or key when fetch prop is provided (via API route).
+  // When fallbackKey is set, tries primary key first, then fallback if null.
   useEffect(() => {
     if (!fetchProp || contentProp) return;
-    const q = fetchProp.id ? `id=${encodeURIComponent(fetchProp.id)}` : `key=${encodeURIComponent(fetchProp.key)}`;
+    const keysToTry = fetchProp.id
+      ? [fetchProp.id]
+      : [fetchProp.key, fetchProp.fallbackKey].filter(Boolean);
+    if (keysToTry.length === 0) return;
     let cancelled = false;
-    fetch(`/api/amplience/content?${q}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((item) => { if (!cancelled) setContent(item); })
-      .catch(() => { if (!cancelled) setContent(null); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+    const tryFetch = (index) => {
+      if (cancelled || index >= keysToTry.length) {
+        if (!cancelled) setLoading(false);
+        return;
+      }
+      const isId = !!fetchProp.id;
+      const keyOrId = keysToTry[index];
+      const q = isId ? `id=${encodeURIComponent(keyOrId)}` : `key=${encodeURIComponent(keyOrId)}`;
+      fetch(`/api/amplience/content?${q}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((item) => {
+          if (cancelled) return;
+          if (item != null && (item._meta || item.headline || item.background || item.image)) {
+            setContent(item);
+            setLoading(false);
+          } else if (index + 1 < keysToTry.length) {
+            tryFetch(index + 1);
+          } else {
+            setContent(null);
+          }
+        })
+        .catch(() => {
+          if (cancelled) return;
+          if (index + 1 < keysToTry.length) {
+            tryFetch(index + 1);
+          } else {
+            setContent(null);
+          }
+        })
+        .finally(() => {
+          if (cancelled) return;
+          if (index + 1 >= keysToTry.length) setLoading(false);
+        });
+    };
+    tryFetch(0);
     return () => { cancelled = true; };
-  }, [fetchProp?.id, fetchProp?.key, contentProp]);
+  }, [fetchProp?.id, fetchProp?.key, fetchProp?.fallbackKey, contentProp]);
 
   const map = useMemo(() => ({ ...DEFAULT_COMPONENTS, ...components }), [components]);
   const schema = content?._meta?.schema;
@@ -85,7 +127,7 @@ export function AmplienceWrapper({ content: contentProp, fetch: fetchProp, compo
   const editLabel = schema ? "content" : "banner";
 
   if (loading) return <div className="animate-pulse h-20 bg-muted rounded" />;
-  if (content == null) return null;
+  if (content == null) return placeholder ?? null;
 
   const rendered = Component ? (
     <Component {...content} />
