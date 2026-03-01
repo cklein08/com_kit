@@ -2,6 +2,7 @@ import Image from "next/image"
 import OptimizedImage from "@/components/optimizedimage"
 import { Button } from "@/components/button"
 import Link from "next/link"
+import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper"
 import './product-collection.css'
 
 export function ProductCollection({ content, config }) {
@@ -51,15 +52,19 @@ export function ProductCollection({ content, config }) {
   return (
     <section className="product-collection" {...editorProps}>
       {content && content.cardCollection.map((item, index) => {
-        const editorProps = {
+        const itemEditorProps = {
           'data-aue-resource': `urn:aemconnection:${item?._path}/jcr:content/data/${item?._variation}`,
           'data-aue-type': 'component',
           'data-aue-label': 'Screen',
           'data-aue-model': content?._model?._path
         };
 
-        return (
-          <div key={item?._path ?? index} className="collection-item group" {...editorProps}>
+        const aemEditorUrl = config?.env && item?._path
+          ? `${config.env.replace(/\/$/, "")}/editor.html${item._path.startsWith("/") ? item._path : `/${item._path}`}`
+          : null;
+
+        const teaserContent = (
+          <div key={item?._path ?? index} className="collection-item group" {...itemEditorProps}>
             <OptimizedImage
               asset={item.asset}
               alt={item.title}
@@ -71,7 +76,6 @@ export function ProductCollection({ content, config }) {
               config={config}
               imageProps={imageProps}
             />
-            {/* <Image src="/person-on-bleachers.png" alt="Person sitting on bleachers" fill className="collection-image" /> */}
             <div className="collection-overlay" />
             <div className="collection-content">
               <h2 className="collection-title" data-aue-prop='title' data-aue-type='text' data-aue-label='Title'>{item.title}</h2>
@@ -80,6 +84,16 @@ export function ProductCollection({ content, config }) {
               </Button>
             </div>
           </div>
+        );
+
+        return (
+          <EditPencilWrapper
+            key={item?._path ?? index}
+            href={aemEditorUrl}
+            label={item?.title || "teaser"}
+          >
+            {teaserContent}
+          </EditPencilWrapper>
         )
       })}
     </section>
