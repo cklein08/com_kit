@@ -8,6 +8,7 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  serverExternalPackages: ["dc-delivery-sdk-js", "axios"],
   turbopack: {
     root: path.resolve(__dirname),
   },

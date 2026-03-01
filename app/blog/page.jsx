@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
 import { MainNav } from "@/components/main-nav";
 import { AuthBar } from "@/components/auth-bar";
 import { Footer } from "@/components/footer";
-import { UE_CORS_SCRIPT_URL, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
+import { DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
 
 /** Fallback blog matching the PDP widget when no AEM content exists */
 const DEFAULT_BLOG = {
@@ -63,7 +62,6 @@ export default function BlogListPage() {
 
   return (
     <>
-      <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <div className="utility-bar">
           <Link href="#" className="hover:underline">Find a Store</Link>

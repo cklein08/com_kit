@@ -22,6 +22,8 @@ export async function GET(request) {
       : await getContentByKey(key, { vse, locale });
     return NextResponse.json(content);
   } catch (err) {
-    return NextResponse.json({ error: String(err.message) }, { status: 500 });
+    const msg = err?.message ?? String(err);
+    console.error("[amplience/content] GET error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

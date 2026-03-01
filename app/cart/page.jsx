@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
 import AEMHeadless from "@adobe/aem-headless-client-js";
 import { useCart } from "@/contexts/cart-context";
 import { MainNav } from "@/components/main-nav";
@@ -18,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronRight, Minus, Plus, ShoppingBag, Tag, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { UE_CORS_SCRIPT_URL } from "@/lib/constants";
 
 function formatPrice(price) {
   if (!price) return "—";
@@ -51,7 +49,6 @@ const EXAMPLE_UPSELL = {
 function CartPageLayout({ config, locale, children }) {
   return (
     <>
-      <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <div className="utility-bar">
           <Link href="/" className="hover:underline">

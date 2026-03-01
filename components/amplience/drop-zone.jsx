@@ -1,17 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { AMPLIENCE_COMPONENTS } from "@/lib/amplience/component-registry";
-import { AMPLIENCE_HUB } from "@/lib/constants";
 import { AmplienceWrapper } from "@/components/amplience/wrapper";
+import { AddComponentDialog } from "@/components/amplience/add-component-dialog";
 
 /**
  * Drop zone for adding Amplience content when ?vse= is present.
@@ -21,15 +15,13 @@ import { AmplienceWrapper } from "@/components/amplience/wrapper";
  * @param {{ slotKey: string, label?: string, isEmpty: boolean, children: React.ReactNode, className?: string }} props
  */
 export function DropZone({ slotKey, label, isEmpty, children, className = "" }) {
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
-  const hub = searchParams.get("hub") || searchParams.get("hubname") || AMPLIENCE_HUB;
 
   if (!vse) {
     return <div className={className}>{children}</div>;
   }
-
-  const contentStudioBase = `https://${hub}.amplience.net`;
 
   return (
     <div
@@ -38,35 +30,35 @@ export function DropZone({ slotKey, label, isEmpty, children, className = "" }) 
       data-slot-key={slotKey}
     >
       {isEmpty ? (
-        <Popover>
-          <PopoverTrigger asChild>
-            <div className="flex min-h-[60px] items-center justify-center rounded-md border-2 border-dashed border-zinc-300 bg-zinc-50/50 transition hover:border-zinc-400 hover:bg-zinc-100/80">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-zinc-600 hover:text-zinc-900"
-              >
-                <Plus className="h-4 w-4" />
-                Add component
-              </Button>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-2" align="start">
-            <div className="space-y-1">
-              <p className="px-2 py-1 text-xs font-medium text-zinc-500">
-                Add to {label || slotKey}
-              </p>
-              {AMPLIENCE_COMPONENTS.map((comp) => (
-                <AddComponentLink
-                  key={comp.schemaUri}
-                  component={comp}
-                  slotKey={slotKey}
-                  contentStudioBase={contentStudioBase}
-                />
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
+        <>
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setAddDialogOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setAddDialogOpen(true);
+              }
+            }}
+            className="flex min-h-[60px] cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-zinc-300 bg-zinc-50/50 transition hover:border-zinc-400 hover:bg-zinc-100/80"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-zinc-600 hover:text-zinc-900 pointer-events-none"
+            >
+              <Plus className="h-4 w-4" />
+              Add component
+            </Button>
+          </div>
+          <AddComponentDialog
+            open={addDialogOpen}
+            onOpenChange={setAddDialogOpen}
+            slotKey={slotKey}
+            label={label || slotKey}
+          />
+        </>
       ) : (
         <div className="relative">
           {children}
@@ -79,24 +71,6 @@ export function DropZone({ slotKey, label, isEmpty, children, className = "" }) 
         </div>
       )}
     </div>
-  );
-}
-
-function AddComponentLink({ component, slotKey, contentStudioBase }) {
-  const createUrl = `${contentStudioBase}/app/#/content-item/create`;
-  const Icon = component.icon;
-
-  return (
-    <a
-      href={createUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-zinc-100"
-      title={`Create ${component.label}. Set delivery key to: ${slotKey}`}
-    >
-      {Icon ? <Icon className="h-4 w-4 text-zinc-500 shrink-0" /> : null}
-      <span>{component.label}</span>
-    </a>
   );
 }
 
@@ -113,20 +87,24 @@ export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", pla
   const searchParams = useSearchParams();
   const vse = searchParams.get("vse") || searchParams.get("cse");
 
+  const cancelledRef = useRef(false);
+
   useEffect(() => {
-    let cancelled = false;
+    cancelledRef.current = false;
+    setLoading(true);
+
     const tryFetch = (key) =>
       fetch(`/api/amplience/content?key=${encodeURIComponent(key)}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((item) => {
-          if (cancelled) return item;
+          if (cancelledRef.current) return item;
           const hasContent = item != null && (item._meta || item.headline || item.background || item.image || item.title);
           return hasContent ? item : null;
         });
 
     tryFetch(slotKey)
       .then((item) => {
-        if (cancelled) return;
+        if (cancelledRef.current) return;
         if (item != null) {
           setContent(item);
         } else if (fallbackKey) {
@@ -136,12 +114,44 @@ export function AmplienceSlot({ slotKey, fallbackKey, label, className = "", pla
         }
       })
       .then((fallbackItem) => {
-        if (cancelled || fallbackItem === undefined) return;
+        if (cancelledRef.current || fallbackItem === undefined) return;
         setContent(fallbackItem);
       })
-      .catch(() => { if (!cancelled) setContent(null); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .catch(() => { if (!cancelledRef.current) setContent(null); })
+      .finally(() => { if (!cancelledRef.current) setLoading(false); });
+
+    return () => { cancelledRef.current = true; };
+  }, [slotKey, fallbackKey]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.slotKey === slotKey) {
+        cancelledRef.current = false;
+        setLoading(true);
+        fetch(`/api/amplience/content?key=${encodeURIComponent(slotKey)}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((item) => {
+            if (cancelledRef.current) return;
+            const hasContent = item != null && (item._meta || item.headline || item.background || item.image || item.title);
+            if (hasContent) setContent(item);
+            else if (fallbackKey) {
+              return fetch(`/api/amplience/content?key=${encodeURIComponent(fallbackKey)}`)
+                .then((r) => (r.ok ? r.json() : null))
+                .then((fb) => {
+                  if (cancelledRef.current) return;
+                  const hasFb = fb != null && (fb._meta || fb.headline || fb.background || fb.image || fb.title);
+                  setContent(hasFb ? fb : null);
+                });
+            } else setContent(null);
+          })
+          .catch(() => { if (!cancelledRef.current) setContent(null); })
+          .finally(() => { if (!cancelledRef.current) setLoading(false); });
+      }
+    };
+    if (typeof globalThis.window !== "undefined") {
+      globalThis.window.addEventListener("amplience-slot-refresh", handler);
+      return () => globalThis.window.removeEventListener("amplience-slot-refresh", handler);
+    }
   }, [slotKey, fallbackKey]);
 
   if (loading) {

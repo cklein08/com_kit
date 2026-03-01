@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, Suspense, Fragment } from 'react'
 import Link from "next/link"
-import Script from 'next/script';
 import Head from 'next/head';
 import { MainNav } from "@/components/main-nav"
 import { AuthBar } from "@/components/auth-bar"
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { EditableCarousel } from "@/components/running-shoes-carousel/editable-carousel";
 import { AmplienceSlot } from "@/components/amplience/drop-zone";
-import { UE_CORS_SCRIPT_URL, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
+import { DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
 
 
 export default function Component() {
@@ -121,7 +120,6 @@ export default function Component() {
 
   return (
     <>
-      <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex flex-col min-h-screen bg-background text-foreground">
         {/* Top Utility Bar */}
         <div className="utility-bar">

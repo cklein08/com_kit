@@ -76,7 +76,7 @@ export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
       title: "Components",
       Component: ComponentsPanel,
       visible: !!vse,
-      props: { hubname },
+      props: {},
     },
   ].filter((i) => i.visible);
 

@@ -2,7 +2,6 @@
 import { useRouter } from 'next/navigation'
 import { use, useState, useEffect, Suspense, Fragment } from 'react'
 import Link from "next/link"
-import Script from 'next/script';
 import { MainNav } from "@/components/main-nav"
 import { AuthBar } from "@/components/auth-bar"
 import { ModelManager } from "@/components/model-manager"
@@ -16,7 +15,7 @@ import { AmplienceWrapper } from "@/components/amplience/wrapper"
 import { EditableCarousel } from "@/components/running-shoes-carousel/editable-carousel"
 import { AmplienceSlot } from "@/components/amplience/drop-zone"
 import { getProductWithVariants } from "@/lib/api/plp"
-import { UE_CORS_SCRIPT_URL, URL_LOCALE_SEGMENTS, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants"
+import { URL_LOCALE_SEGMENTS, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants"
 
 export default function Page({ params }) {
   const resolvedParams = use(params)
@@ -44,8 +43,18 @@ export default function Page({ params }) {
     const storedProjectName = localStorage.getItem('projectName');
     const storedLocale = localStorage.getItem('locale') || 'en';
     const isInUniversalEditor = window.self !== window.top;
-    const aemEnv = storedAemEnv || (isInUniversalEditor ? DEFAULT_AEM_EDITOR_URL : '');
-    const aemProject = storedProjectName || (isInUniversalEditor ? DEFAULT_AEM_PROJECT : '');
+    const slugSegments = resolvedParams?.slug?.length ? resolvedParams.slug : ['home', 'home'];
+
+    // When URL has full AEM path (e.g. /content/dam/v0/site/en/new-arrivals/new-arrivals), infer project from URL so page renders without config modal
+    const isFullAemPathInUrl =
+      slugSegments.length >= 5 &&
+      slugSegments[0] === 'content' &&
+      slugSegments[1] === 'dam' &&
+      slugSegments[3] === 'site';
+    const inferredProject = isFullAemPathInUrl ? slugSegments[2] : null;
+
+    const aemEnv = storedAemEnv || (isInUniversalEditor ? DEFAULT_AEM_EDITOR_URL : '') || (inferredProject ? DEFAULT_AEM_EDITOR_URL : '');
+    const aemProject = storedProjectName || (isInUniversalEditor ? DEFAULT_AEM_PROJECT : '') || inferredProject || '';
 
     setAemEnvironment(storedAemEnv || '');
     setProjectName(storedProjectName || '');
@@ -87,7 +96,6 @@ export default function Page({ params }) {
     });
 
     // Build AEM content path. If URL is already the full path (e.g. /content/dam/v0/site/en/new-arrivals/new-arrivals), use it as-is.
-    const slugSegments = resolvedParams?.slug?.length ? resolvedParams.slug : ['home', 'home'];
     const isFullAemPath =
       slugSegments.length >= 5 &&
       slugSegments[0] === 'content' &&
@@ -195,7 +203,6 @@ export default function Page({ params }) {
 
   return (
     <>
-      <Script src={UE_CORS_SCRIPT_URL} async />
       <div className="flex flex-col min-h-screen bg-background text-foreground">
         {/* Top Utility Bar */}
         <div className="utility-bar">
