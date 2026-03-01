@@ -11,6 +11,7 @@ import { AuthBar } from "@/components/auth-bar";
 import { Footer } from "@/components/footer";
 import { HeroSection } from "@/components/hero-section/hero-section";
 import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
+import { AmplienceSlot } from "@/components/amplience/drop-zone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -205,12 +206,13 @@ export default function CartPage() {
   return (
     <CartPageLayout config={config} locale={locale}>
     <div className="bg-gray-50">
-      {/* Drop-in: Banners (e.g. promo banners, messaging) */}
-      <div
-        className="cart-page-banner-slot min-h-[80px] border-b border-gray-200 bg-white px-4 py-3"
-        data-slot="cart-banners"
-      >
-        {/* Drop-in: Add your banner components here (promo strips, messaging, etc.) */}
+      {/* Amplience banner slot */}
+      <div className="cart-page-banner-slot border-b border-gray-200 bg-white">
+        <AmplienceSlot
+          slotKey="cart/slot/banners"
+          label="Banners"
+          className="min-h-[80px] px-4 py-3"
+        />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 py-8">
@@ -476,11 +478,16 @@ export default function CartPage() {
           {/* Order summary sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-4 space-y-4">
-              {/* Drop-in: Coupons / Promo code */}
+              {/* Amplience coupon slot + Promo code */}
               <div
                 className="rounded-lg bg-white p-4 shadow-sm"
                 data-slot="cart-coupons"
               >
+                <AmplienceSlot
+                  slotKey="cart/slot/coupons"
+                  label="Coupons"
+                  className="mb-4"
+                />
                 <Label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Tag className="h-4 w-4" />
                   Promo code
@@ -579,7 +586,7 @@ export default function CartPage() {
           </div>
           </div>
 
-          {/* Drop-in: Product upsell / cross-sell (e.g. "You may also like", "Complete your order") */}
+          {/* Amplience upsell slot */}
           <section
             className="cart-page-upsell-slot col-span-full mt-10 border-t border-gray-200 pt-10"
             data-slot="cart-upsell"
@@ -587,43 +594,44 @@ export default function CartPage() {
             <h3 className="mb-4 text-lg font-semibold text-gray-900">
               Complete your order
             </h3>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {/* Upsell product 1: example product card */}
-              <Link
-                href={`/product/${EXAMPLE_UPSELL.sku}`}
-                className="cart-page-upsell-item group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-                data-slot="cart-upsell-item-1"
-              >
-                <div className="relative aspect-square w-full bg-gray-100">
-                  <Image
-                    src={EXAMPLE_UPSELL.imageUrl}
-                    alt={EXAMPLE_UPSELL.name}
-                    fill
-                    className="object-cover transition-transform group-hover:scale-105"
-                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-                  />
-                </div>
-                <div className="flex flex-1 flex-col p-3">
-                  <p className="font-medium text-gray-900">{EXAMPLE_UPSELL.name}</p>
-                  <p className="mt-1 text-sm font-semibold text-gray-900">
-                    {formatPrice({ amount: { value: EXAMPLE_UPSELL.price, currency: EXAMPLE_UPSELL.currency } })}
-                  </p>
-                </div>
-              </Link>
-              {/* Placeholder slots: replace with your product cards or CMS-driven components */}
-              {[2, 3, 4].map((i) => {
-                const slotId = "cart-upsell-item-" + i;
-                return (
-                  <div
-                    key={i}
-                    className="cart-page-upsell-item flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-4 text-center text-sm text-gray-500"
-                    data-slot={slotId}
+            <AmplienceSlot
+              slotKey="cart/slot/upsell"
+              label="Upsell"
+              placeholder={
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                  <Link
+                    href={`/product/${EXAMPLE_UPSELL.sku}`}
+                    className="cart-page-upsell-item group flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    data-slot="cart-upsell-item-1"
                   >
-                    Upsell product {i}
-                  </div>
-                );
-              })}
-            </div>
+                    <div className="relative aspect-square w-full bg-gray-100">
+                      <Image
+                        src={EXAMPLE_UPSELL.imageUrl}
+                        alt={EXAMPLE_UPSELL.name}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-105"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                      />
+                    </div>
+                    <div className="flex flex-1 flex-col p-3">
+                      <p className="font-medium text-gray-900">{EXAMPLE_UPSELL.name}</p>
+                      <p className="mt-1 text-sm font-semibold text-gray-900">
+                        {formatPrice({ amount: { value: EXAMPLE_UPSELL.price, currency: EXAMPLE_UPSELL.currency } })}
+                      </p>
+                    </div>
+                  </Link>
+                  {[2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="cart-page-upsell-item flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-4 text-center text-sm text-gray-500"
+                      data-slot={`cart-upsell-item-${i}`}
+                    >
+                      Upsell product {i}
+                    </div>
+                  ))}
+                </div>
+              }
+            />
           </section>
         </div>
       </div>

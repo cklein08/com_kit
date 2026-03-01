@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, Fragment } from 'react'
 import Link from "next/link"
 import Script from 'next/script';
 import Head from 'next/head';
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { EditableCarousel } from "@/components/running-shoes-carousel/editable-carousel";
+import { AmplienceSlot } from "@/components/amplience/drop-zone";
 import { UE_CORS_SCRIPT_URL, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants";
 
 
@@ -163,15 +164,19 @@ export default function Component() {
               const insertCarouselBefore = categoryGridIndex >= 0 ? categoryGridIndex : blocks.length;
               return (
                 <>
-                  {blocks.map((block, n) => {
-                    const blockEditorProps = {
-                      'data-aue-resource': `urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`,
-                      'data-aue-type': 'component',
-                      'data-aue-label': block?._model?.title ?? 'Block',
-                      'data-aue-model': block?._model?._path,
-                    };
-                    return (
-                      <div key={n} className="block-container" {...blockEditorProps}>
+                  {blocks.map((block, n) => (
+                    <Fragment key={n}>
+                      <AmplienceSlot
+                        slotKey={`home/body/slot/${n}`}
+                        label={`Slot ${n + 1}`}
+                      />
+                      <div
+                        className="block-container"
+                        data-aue-resource={`urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`}
+                        data-aue-type="component"
+                        data-aue-label={block?._model?.title ?? "Block"}
+                        data-aue-model={block?._model?._path}
+                      >
                         {n === insertCarouselBefore && (
                           <Suspense fallback={<div className="min-h-[200px]" />}>
                             <EditableCarousel />
@@ -179,8 +184,12 @@ export default function Component() {
                         )}
                         <ModelManager content={block} config={config} />
                       </div>
-                    );
-                  })}
+                    </Fragment>
+                  ))}
+                  <AmplienceSlot
+                    slotKey={`home/body/slot/${blocks.length}`}
+                    label={`Slot ${blocks.length + 1}`}
+                  />
                 </>
               );
             }

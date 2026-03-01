@@ -24,6 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/vnd.adobe.aue.filter+json"
+          src="/filter-definition.json"
+        />
+      </head>
       <body suppressHydrationWarning>
         <UniversalEditorConnection />
         <AmplienceThemeProvider>

@@ -1,6 +1,6 @@
 "use client"
 import { useRouter } from 'next/navigation'
-import { use, useState, useEffect, Suspense } from 'react'
+import { use, useState, useEffect, Suspense, Fragment } from 'react'
 import Link from "next/link"
 import Script from 'next/script';
 import { MainNav } from "@/components/main-nav"
@@ -14,6 +14,7 @@ import { ProductListPage } from "@/components/product-list-page/product-list-pag
 import { ProductDetail } from "@/components/product-detail/product-detail"
 import { AmplienceWrapper } from "@/components/amplience/wrapper"
 import { EditableCarousel } from "@/components/running-shoes-carousel/editable-carousel"
+import { AmplienceSlot } from "@/components/amplience/drop-zone"
 import { getProductWithVariants } from "@/lib/api/plp"
 import { UE_CORS_SCRIPT_URL, URL_LOCALE_SEGMENTS, DEFAULT_AEM_EDITOR_URL, DEFAULT_AEM_PROJECT } from "@/lib/constants"
 
@@ -214,6 +215,13 @@ export default function Page({ params }) {
         <main className="flex-1" {...editorProps}>
           {isProductPath ? (
             <>
+              {/* Amplience PDP top slot */}
+              {productSlug && (
+                <AmplienceSlot
+                  slotKey={`pdp/slot/${String(productSlug).toUpperCase()}/top`}
+                  label="PDP top"
+                />
+              )}
               {/* Existing: Adobe Commerce product data via ProductDetail */}
               <ProductDetail
                 variantData={productDetail}
@@ -231,6 +239,13 @@ export default function Page({ params }) {
                   />
                 );
               })}
+              {/* Amplience PDP bottom slot */}
+              {productSlug && (
+                <AmplienceSlot
+                  slotKey={`pdp/slot/${String(productSlug).toUpperCase()}/bottom`}
+                  label="PDP bottom"
+                />
+              )}
             </>
           ) : (
             content && content.block && (() => {
@@ -239,24 +254,39 @@ export default function Page({ params }) {
                 (b) => b._model?.title && b._model.title.replace(/\s/g, '') === 'CategoryGrid'
               );
               const insertCarouselBefore = categoryGridIndex >= 0 ? categoryGridIndex : blocks.length;
-              return blocks.map((block, n) => {
-                const blockEditorProps = {
-                  'data-aue-resource': `urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`,
-                  'data-aue-type': 'component',
-                  'data-aue-label': block?._model?.title ?? 'Block',
-                  'data-aue-model': block?._model?._path,
-                };
-                return (
-                  <div key={n} className="block-container" {...blockEditorProps}>
-                    {n === insertCarouselBefore && (
-                      <Suspense fallback={<div className="min-h-[200px]" />}>
-                        <EditableCarousel />
-                      </Suspense>
-                    )}
-                    <ModelManager content={block} config={config} />
-                  </div>
-                );
-              });
+              const slugSegments = resolvedParams?.slug || [];
+              const pageSlug = slugSegments[0] === 'content' ? slugSegments.slice(-2).join('/') : slugSegments.join('/') || 'page';
+              const slotBase = `slug/${pageSlug}/body/slot`;
+              return (
+                <>
+                  {blocks.map((block, n) => (
+                    <Fragment key={n}>
+                      <AmplienceSlot
+                        slotKey={`${slotBase}/${n}`}
+                        label={`Slot ${n + 1}`}
+                      />
+                      <div
+                        className="block-container"
+                        data-aue-resource={`urn:aemconnection:${block?._path}/jcr:content/data/${block?._variation}`}
+                        data-aue-type="component"
+                        data-aue-label={block?._model?.title ?? 'Block'}
+                        data-aue-model={block?._model?._path}
+                      >
+                        {n === insertCarouselBefore && (
+                          <Suspense fallback={<div className="min-h-[200px]" />}>
+                            <EditableCarousel />
+                          </Suspense>
+                        )}
+                        <ModelManager content={block} config={config} />
+                      </div>
+                    </Fragment>
+                  ))}
+                  <AmplienceSlot
+                    slotKey={`${slotBase}/${blocks.length}`}
+                    label={`Slot ${blocks.length + 1}`}
+                  />
+                </>
+              );
             })()
           )}
           {/* <ProductListPage /> */}

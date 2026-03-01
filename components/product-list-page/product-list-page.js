@@ -30,8 +30,7 @@ import {
 } from "@/lib/constants";
 import { capitalize } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
-import { AmplienceWrapper } from "@/components/amplience/wrapper";
-import { PlpBanner } from "@/components/amplience/plp-banner";
+import { AmplienceSlot } from "@/components/amplience/drop-zone";
 import { PlpFacets } from "./plp-facets";
 import { PlpCategoryCarousel } from "./plp-category-carousel";
 import { PlpShoppableImage } from "./plp-shoppable-image";
@@ -612,26 +611,22 @@ export function ProductListPage({ content, config }) {
             {/* Amplience banner slot just above product grid (e.g. "New Seasons" banner) */}
             {plpBannerKey && (
               <div className="plp-banner-slot">
-                <AmplienceWrapper
-                  fetch={{
-                    key: plpBannerKey,
-                    fallbackKey: plpBannerKey !== "plp/slot/top" ? "plp/slot/top" : undefined,
-                  }}
-                  placeholder={
-                    <PlpBanner
-                      headline="New Season"
-                      strapline="Discover the latest arrivals"
-                      background={{
-                        image: {
-                          url: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&q=80",
-                        },
-                        alt: "New Season fashion",
-                      }}
-                      link={{ url: "/", title: "Shop Now" }}
-                    />
-                  }
+                <AmplienceSlot
+                  slotKey={plpBannerKey}
+                  fallbackKey={plpBannerKey !== "plp/slot/top" ? "plp/slot/top" : undefined}
+                  label="Banner"
                 />
               </div>
+            )}
+
+            {/* Amplience mid slot (between banner and grid) */}
+            {plpBannerKey && (
+              <AmplienceSlot
+                slotKey={plpBannerKey.replace(/\/slot\/top$/, "/slot/mid")}
+                fallbackKey="plp/slot/mid"
+                label="Mid slot"
+                className="mb-4"
+              />
             )}
 
             {/* Product Grid / List */}
@@ -764,6 +759,16 @@ export function ProductListPage({ content, config }) {
                   )}
                 </Button>
               </div>
+            )}
+
+            {/* Amplience bottom slot (below product grid) */}
+            {plpBannerKey && (
+              <AmplienceSlot
+                slotKey={plpBannerKey.replace(/\/slot\/top$/, "/slot/bottom")}
+                fallbackKey="plp/slot/bottom"
+                label="Bottom slot"
+                className="mt-8"
+              />
             )}
           </div>
         </div>

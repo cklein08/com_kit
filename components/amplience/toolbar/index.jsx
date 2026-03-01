@@ -7,6 +7,7 @@ import { VisualizationPanel } from "./visualization-panel";
 import { EnvironmentsPanel } from "./environments-panel";
 import { SitesPanel } from "./sites-panel";
 import { ThemePickerPanel } from "./theme-picker-panel";
+import { ComponentsPanel } from "./components-panel";
 import { PanelRightOpen, X } from "lucide-react";
 import { getAmplienceConfig } from "@/lib/amplience/config-client";
 
@@ -69,6 +70,13 @@ export function AmplienceToolbar({ vse, hubname, contentId, locale }) {
       Component: ThemePickerPanel,
       visible: themes.length > 0,
       props: { themes },
+    },
+    {
+      value: "4",
+      title: "Components",
+      Component: ComponentsPanel,
+      visible: !!vse,
+      props: { hubname },
     },
   ].filter((i) => i.visible);
 
