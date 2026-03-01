@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
 
 /**
  * Shoppable image with product hotspots - similar to Mobify reference.
@@ -90,9 +91,9 @@ function HotspotPreview({ spot }) {
   );
 }
 
-export function PlpShoppableImage() {
+export function PlpShoppableImage({ editUrl }) {
   const hotspots = buildHotspots();
-  return (
+  const content = (
     <TooltipProvider delayDuration={200}>
       <div className="plp-shoppable-image">
         <div className="plp-shoppable-image-inner">
@@ -137,4 +138,16 @@ export function PlpShoppableImage() {
       </div>
     </TooltipProvider>
   );
+  if (editUrl) {
+    return (
+      <EditPencilWrapper
+        href={editUrl}
+        label="shoppable image (catalog: 3 hot zones + background image)"
+        className="plp-shoppable-edit-wrapper"
+      >
+        {content}
+      </EditPencilWrapper>
+    );
+  }
+  return content;
 }

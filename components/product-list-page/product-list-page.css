@@ -138,6 +138,20 @@
   }
 }
 
+/* Wrapper for shoppable image when edit pencil is shown - preserves image layout and animations */
+.plp-shoppable-edit-wrapper {
+  display: flex;
+  min-height: 0;
+  align-self: stretch;
+  position: relative;
+}
+
+.plp-shoppable-edit-wrapper .plp-shoppable-image {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
 /* PLP shoppable image (left side of grid, below carousel) - matches product card row height */
 .plp-shoppable-image {
   position: relative;

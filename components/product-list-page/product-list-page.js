@@ -640,8 +640,8 @@ export function ProductListPage({ content, config }) {
             <Fragment key={product.sku}>
               {index === 8 && productViewMode === "grid" && (
                 <>
-                  <PlpCategoryCarousel />
-                  <PlpShoppableImage />
+                  <PlpCategoryCarousel editUrl={showPencil ? aemEditorUrl : null} />
+                  <PlpShoppableImage editUrl={showPencil ? aemEditorUrl : null} />
                 </>
               )}
               <Card className={`product-card ${productViewMode === "list" ? "product-card-list" : ""}`}>

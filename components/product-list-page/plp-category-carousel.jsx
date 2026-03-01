@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { EditPencilWrapper } from "@/components/amplience/edit-pencil-wrapper";
 
 /** Fake category carousel for PLP (Jackets, Purses, Hats) - similar to Mobify reference */
 const PLP_CATEGORIES = [
@@ -32,7 +33,7 @@ const PLP_CATEGORIES = [
   },
 ];
 
-export function PlpCategoryCarousel() {
+export function PlpCategoryCarousel({ editUrl }) {
   return (
     <section className="plp-category-carousel w-full py-8">
       <div className="plp-category-carousel-inner">
@@ -50,25 +51,30 @@ export function PlpCategoryCarousel() {
                 key={category.name}
                 className="pl-2 basis-full sm:basis-1/2 md:basis-1/3"
               >
-                <Link
-                  href={category.href}
-                  className="plp-category-carousel-item group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
+                <EditPencilWrapper
+                  href={editUrl}
+                  label={`${category.name} (catalog)`}
                 >
-                  <div className="relative aspect-[4/3] bg-zinc-100">
-                    <Image
-                      src={category.image}
-                      alt={category.alt}
-                      fill
-                      className="object-cover transition group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-                      unoptimized
-                    />
-                  </div>
-                  <div className="p-4">
-                    <p className="font-semibold text-zinc-900">{category.name}</p>
-                    <span className="text-sm text-zinc-500">Shop Now →</span>
-                  </div>
-                </Link>
+                  <Link
+                    href={category.href}
+                    className="plp-category-carousel-item group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
+                  >
+                    <div className="relative aspect-[4/3] bg-zinc-100">
+                      <Image
+                        src={category.image}
+                        alt={category.alt}
+                        fill
+                        className="object-cover transition group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="p-4">
+                      <p className="font-semibold text-zinc-900">{category.name}</p>
+                      <span className="text-sm text-zinc-500">Shop Now →</span>
+                    </div>
+                  </Link>
+                </EditPencilWrapper>
               </CarouselItem>
             ))}
           </CarouselContent>
