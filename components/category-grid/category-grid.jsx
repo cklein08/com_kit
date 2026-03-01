@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/button'
 import { mapJsonRichText } from '@/lib/renderRichText'
+import { EditPencilWrapper } from '@/components/amplience/edit-pencil-wrapper'
 import './category-grid.css'
 
 export function CategoryGrid({ content, config }) {
@@ -39,13 +40,22 @@ export function CategoryGrid({ content, config }) {
     'data-aue-model': content?._model?._path
   };
 
-  console.log(content);
+  const aemEditorUrl = config?.env && content?._path
+    ? `${config.env.replace(/\/$/, "")}/editor.html${content._path.startsWith("/") ? content._path : `/${content._path}`}`
+    : null;
+
   return (
     <section className='category-grid' {...editorProps}>
       <h2 className='category-grid-title' data-aue-prop='headline' data-aue-type='richtext' data-aue-label='Headline'>{mapJsonRichText(content?.headline.json)}</h2>
       <div className='category-items'>
         {categories.map((category) => (
-          <GridItem key={category.name} category={category} />
+          <EditPencilWrapper
+            key={category.name}
+            href={aemEditorUrl}
+            label={category.name}
+          >
+            <GridItem category={category} />
+          </EditPencilWrapper>
         ))}
       </div>
     </section>
@@ -54,7 +64,7 @@ export function CategoryGrid({ content, config }) {
 
 const GridItem = ({ category }) => {
   return (
-    <div key={category.name} className='category-item group'>
+    <div className='category-item group'>
       <Image src={category.image || '/placeholder.svg'} alt={category.alt} fill className='category-item-image' />
       <div className='category-item-overlay' />
       <div className='category-item-content'>
