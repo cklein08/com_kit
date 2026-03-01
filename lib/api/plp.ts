@@ -52,6 +52,125 @@ export type ProductSearchResult = {
   products: Product[];
 };
 
+export type FacetOption = { value: string; count: number };
+export type PriceRangeFacet = { from: number; to: number; count: number };
+export type Facets = {
+  category: FacetOption[];
+  color: FacetOption[];
+  size: FacetOption[];
+  price: PriceRangeFacet[];
+};
+
+const PRICE_RANGES = [
+  { from: 0, to: 20, label: "$0 - $19.99" },
+  { from: 20, to: 50, label: "$20 - $49.99" },
+  { from: 50, to: 100, label: "$50 - $99.99" },
+  { from: 100, to: 500, label: "$100 - $499" },
+];
+
+const SIZE_ATTR_NAMES = ["size", "variant_size", "option_size", "sizes"];
+const COLOR_ATTR_NAMES = ["color", "colour", "variant_color", "option_color"];
+
+function getAttributeValue(product: Product, names: string[]): string | undefined {
+  const att = product.attributes?.find((a) =>
+    names.some((n) =>
+      a.name?.toLowerCase().includes(n) || (a.label?.toLowerCase?.() || "").includes(n)
+    )
+  );
+  return att?.value;
+}
+
+/**
+ * Compute facets from a product list (client-side, for when API does not return facets).
+ */
+export function computeFacetsFromProducts(products: Product[]): Facets {
+  const categoryCounts = new Map<string, number>();
+  const colorCounts = new Map<string, number>();
+  const sizeCounts = new Map<string, number>();
+  const priceCounts = new Map<string, number>();
+
+  for (const p of products) {
+    if (p.category) {
+      categoryCounts.set(p.category, (categoryCounts.get(p.category) || 0) + 1);
+    }
+    const color = getAttributeValue(p, COLOR_ATTR_NAMES);
+    if (color) {
+      colorCounts.set(color, (colorCounts.get(color) || 0) + 1);
+    }
+    const size = getAttributeValue(p, SIZE_ATTR_NAMES);
+    if (size) {
+      sizeCounts.set(size, (sizeCounts.get(size) || 0) + 1);
+    }
+    const priceVal = p.price?.final?.amount?.value ?? p.price?.regular?.amount?.value;
+    if (typeof priceVal === "number") {
+      for (const range of PRICE_RANGES) {
+        if (priceVal >= range.from && priceVal < range.to) {
+          const key = `${range.from}-${range.to}`;
+          priceCounts.set(key, (priceCounts.get(key) || 0) + 1);
+          break;
+        }
+      }
+      if (priceVal >= 500) {
+        priceCounts.set("500+", (priceCounts.get("500+") || 0) + 1);
+      }
+    }
+  }
+
+  return {
+    category: Array.from(categoryCounts.entries())
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => b.count - a.count),
+    color: Array.from(colorCounts.entries())
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => a.value.localeCompare(b.value)),
+    size: Array.from(sizeCounts.entries())
+      .map(([value, count]) => ({ value, count }))
+      .sort((a, b) => a.value.localeCompare(b.value)),
+    price: PRICE_RANGES.map((r) => ({
+      from: r.from,
+      to: r.to,
+      count: priceCounts.get(`${r.from}-${r.to}`) || 0,
+    })).concat(
+      priceCounts.get("500+") ? [{ from: 500, to: Infinity, count: priceCounts.get("500+")! }] : []
+    ),
+  };
+}
+
+/**
+ * Filter products by selected facets (client-side).
+ */
+export function filterProductsByFacets(products: Product[], filters: {
+  category?: string;
+  colors?: string[];
+  sizes?: string[];
+  priceRange?: string | null;
+}): Product[] {
+  return products.filter((p) => {
+    if (filters.category && filters.category !== "all" && p.category !== filters.category) {
+      return false;
+    }
+    if (filters.colors?.length) {
+      const color = getAttributeValue(p, COLOR_ATTR_NAMES);
+      if (!color || !filters.colors.includes(color)) return false;
+    }
+    if (filters.sizes?.length) {
+      const size = getAttributeValue(p, SIZE_ATTR_NAMES);
+      if (!size || !filters.sizes.includes(size)) return false;
+    }
+    if (filters.priceRange) {
+      const priceVal = p.price?.final?.amount?.value ?? p.price?.regular?.amount?.value;
+      if (typeof priceVal !== "number") return false;
+      if (filters.priceRange === "500+") {
+        if (priceVal < 500) return false;
+      } else {
+        const [from, to] = filters.priceRange.split("-").map(Number);
+        if (priceVal < from || priceVal >= to) return false;
+      }
+    }
+    return true;
+  });
+}
+
 export type Product = {
   sku: string;
   name: string;
@@ -106,7 +225,6 @@ export async function searchProducts(
     // Add a top-level category property from the item_category attribute
     products = products.map((item: any) => {
       item.productView.attributes.forEach((element: any) => {
-        console.log(element);
         if (element.name === "item_category") {
           item.productView.category = element.value;
         }
@@ -177,18 +295,6 @@ export type ProductWithVariants = {
   allImages: { url: string }[];
 };
 
-function getAttributeValue(
-  product: Product,
-  names: string[]
-): string | undefined {
-  const att = product.attributes?.find((a) =>
-    names.some((n) =>
-      a.name?.toLowerCase().includes(n) || a.label?.toLowerCase().includes(n)
-    )
-  );
-  return att?.value;
-}
-
 export async function getProductWithVariants(
   sku: string,
   viewId: string = CATALOG_VIEW_ID,
@@ -209,16 +315,14 @@ export async function getProductWithVariants(
   const product = products.find((p) => p.sku.toLowerCase() === sku.toLowerCase())
     ?? products[0];
 
-  const sizeNames = ["size", "variant_size", "option_size", "sizes"];
-  const colorNames = ["color", "colour", "variant_color", "option_color"];
   const sizesSet = new Set<string>();
   const colorMap = new Map<string, { sku: string; images: { url: string }[] }>();
   const allImagesMap = new Map<string, { url: string }>();
 
   for (const p of products) {
-    const sizeVal = getAttributeValue(p, sizeNames);
+    const sizeVal = getAttributeValue(p, SIZE_ATTR_NAMES);
     if (sizeVal) sizesSet.add(sizeVal);
-    const colorVal = getAttributeValue(p, colorNames);
+    const colorVal = getAttributeValue(p, COLOR_ATTR_NAMES);
     const imgs = p.images?.filter((i) => i?.url) ?? [];
     for (const img of imgs) {
       if (img.url) allImagesMap.set(img.url, { url: img.url });

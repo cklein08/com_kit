@@ -96,6 +96,118 @@
   padding: 1.5rem 1rem;
 }
 
+.plp-banner-slot {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+/* Two-column layout: facets sidebar + results */
+.plp-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .plp-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+/* Facet sidebar */
+.plp-facets {
+  flex-shrink: 0;
+  width: 100%;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .plp-facets {
+    width: 240px;
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.plp-facet-section {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.plp-facet-section:last-child {
+  border-bottom: none;
+}
+
+.plp-facet-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 0;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+}
+
+.plp-facet-section-header:hover {
+  color: #374151;
+}
+
+.plp-facet-section-title {
+  flex: 1;
+  text-align: left;
+}
+
+.plp-facet-section-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #6b7280;
+}
+
+.plp-facet-section-content {
+  padding-bottom: 0.75rem;
+}
+
+.plp-facet-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.plp-facet-option:hover {
+  color: #111827;
+}
+
+.plp-facet-option input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #111827;
+}
+
+.plp-facet-option-label {
+  flex: 1;
+}
+
+.plp-facet-option-count {
+  color: #6b7280;
+  font-size: 0.8125rem;
+}
+
+.plp-results-area {
+  flex: 1;
+  min-width: 0;
+}
+
 .results-header {
   display: flex;
   align-items: center;
@@ -197,12 +309,17 @@
   position: relative;
   overflow: hidden;
   border-radius: 0.5rem 0.5rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16rem;
+  background-color: #f9fafb;
 }
 
 .product-image {
   width: 100%;
   height: 16rem;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.2s ease-in-out;
 }
 

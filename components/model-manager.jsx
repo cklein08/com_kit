@@ -14,13 +14,14 @@ export const componentMapping = {
 };
 
 /** Block types that show the pencil edit button when ?vse= or ?cse= is in the URL */
-const EDITABLE_BLOCK_TYPES = ["Hero", "ProductCollection", "CategoryGrid"];
+const EDITABLE_BLOCK_TYPES = ["Hero", "ProductCollection", "CategoryGrid", "ProductCollectionList"];
 
 /** Human-readable labels for the edit button */
 const BLOCK_LABELS = {
   Hero: "banner",
   ProductCollection: "call to actions / teasers",
   CategoryGrid: "categories",
+  ProductCollectionList: "product list",
 };
 
 export const ModelManager = ({ content, config }) => {
