@@ -51,7 +51,7 @@ function CartPageLayout({ config, locale, children }) {
   return (
     <>
       <Script src={UE_CORS_SCRIPT_URL} async />
-      <div className="flex min-h-screen flex-col bg-white text-gray-900">
+      <div className="flex min-h-screen flex-col bg-background text-foreground">
         <div className="utility-bar">
           <Link href="/" className="hover:underline">
             Find a Store

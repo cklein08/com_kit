@@ -105,6 +105,13 @@
     --sidebar-ring: 214 100% 60%;
   }
 
+  /* Theme wrapper: fill viewport and apply theme to body area (header, footer, main content) */
+  [data-amplience-theme] {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100vh;
+  }
+
   /* Apply theme to header, mega menu, footer (they use hardcoded colors otherwise) */
   [data-amplience-theme="blue"] .utility-bar,
   [data-amplience-theme="blue"] .main-header,
@@ -285,6 +292,55 @@
     border-color: hsl(var(--border));
   }
 
+  /* ProductListPage (new-arrivals, PLP) body and product grid */
+  [data-amplience-theme="blue"] .product-list-page {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-list-page .header {
+    background-color: hsl(var(--background));
+    border-bottom-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-list-page .header-title,
+  [data-amplience-theme="blue"] .product-list-page .header-subtitle {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-list-page .main-content {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  /* Product grid and facet box stay default (no theme) */
+  [data-amplience-theme="blue"] .product-list-page .search-input {
+    background-color: hsl(var(--muted));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-list-page .plp-edit-pencil {
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-list-page .plp-edit-pencil:hover {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .block-container {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .category-grid {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .category-grid-title {
+    color: hsl(var(--foreground));
+  }
+  [data-amplience-theme="blue"] .product-collection {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
   [data-amplience-theme="green"] {
     --background: 142 70% 18%;
     --foreground: 0 0% 98%;
@@ -420,6 +476,19 @@
   [data-amplience-theme="green"] .product-detail-empty a { color: hsl(var(--primary)); }
   [data-amplience-theme="green"] .cart-page-banner-slot { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
   [data-amplience-theme="green"] .product-collections { background-color: hsl(var(--card)); color: hsl(var(--card-foreground)); border-color: hsl(var(--border)); }
+  [data-amplience-theme="green"] .product-list-page { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-list-page .header { background-color: hsl(var(--background)); border-bottom-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-list-page .header-title,
+  [data-amplience-theme="green"] .product-list-page .header-subtitle { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-list-page .main-content { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  /* Product grid and facet box stay default (no theme) */
+  [data-amplience-theme="green"] .product-list-page .search-input { background-color: hsl(var(--muted)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-list-page .plp-edit-pencil { background-color: hsl(var(--card)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-list-page .plp-edit-pencil:hover { background-color: hsl(var(--muted)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .block-container { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .category-grid { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .category-grid-title { color: hsl(var(--foreground)); }
+  [data-amplience-theme="green"] .product-collection { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
 
   [data-amplience-theme="blue-green"] {
     --background: 180 55% 18%;
@@ -556,6 +625,19 @@
   [data-amplience-theme="blue-green"] .product-detail-empty a { color: hsl(var(--primary)); }
   [data-amplience-theme="blue-green"] .cart-page-banner-slot { background-color: hsl(var(--background)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
   [data-amplience-theme="blue-green"] .product-collections { background-color: hsl(var(--card)); color: hsl(var(--card-foreground)); border-color: hsl(var(--border)); }
+  [data-amplience-theme="blue-green"] .product-list-page { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-list-page .header { background-color: hsl(var(--background)); border-bottom-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-list-page .header-title,
+  [data-amplience-theme="blue-green"] .product-list-page .header-subtitle { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-list-page .main-content { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  /* Product grid and facet box stay default (no theme) */
+  [data-amplience-theme="blue-green"] .product-list-page .search-input { background-color: hsl(var(--muted)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-list-page .plp-edit-pencil { background-color: hsl(var(--card)); border-color: hsl(var(--border)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-list-page .plp-edit-pencil:hover { background-color: hsl(var(--muted)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .block-container { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .category-grid { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .category-grid-title { color: hsl(var(--foreground)); }
+  [data-amplience-theme="blue-green"] .product-collection { background-color: hsl(var(--background)); color: hsl(var(--foreground)); }
 }
 
 @layer base {
