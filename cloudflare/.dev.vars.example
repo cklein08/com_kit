@@ -1,0 +1,2 @@
+# Copy to .dev.vars for local development (do not commit .dev.vars)
+# COOKIE_SECRET=your-secret-here

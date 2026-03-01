@@ -1,0 +1,28 @@
+# Cloudflare Worker for com_kit – auth at the edge (like awesomeportal)
+# Deploy: cd cloudflare && npm install && npm run deploy
+# Set COOKIE_SECRET: wrangler secret put COOKIE_SECRET
+
+name = "comkit"
+main = "src/index.js"
+compatibility_date = "2025-08-16"
+
+workers_dev = true
+preview_urls = true
+
+[observability.logs]
+enabled = true
+
+[vars]
+# URL of your deployed Next.js app (Vercel, custom, etc.)
+# Users visit the worker URL; the worker proxies to this origin.
+APP_ORIGIN = "http://localhost:3000"
+
+# Microsoft Entra ID (Azure AD) – register app at https://entra.microsoft.com
+# Redirect URI: https://<your-worker>.<account>.workers.dev/auth/callback
+MICROSOFT_ENTRA_TENANT_ID = ""
+MICROSOFT_ENTRA_CLIENT_ID = ""
+MICROSOFT_ENTRA_JWKS_URL = "https://login.microsoftonline.com/common/discovery/keys"
+
+SESSION_COOKIE_EXPIRATION = "6h"
+# LOGIN_PAGE = "/"  # Optional: redirect here when not authenticated
+# DISABLE_AUTHENTICATION = "true"  # Set to disable auth (dev only)

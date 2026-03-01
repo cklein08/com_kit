@@ -18,6 +18,7 @@ pnpm-debug.log*
 # Local env files
 .env
 .env*.local
+cloudflare/.dev.vars
 
 # Vercel
 .vercel

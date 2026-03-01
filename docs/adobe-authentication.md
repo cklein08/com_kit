@@ -44,6 +44,6 @@ Implementation depends on your deployment (AEM, Edge, etc.) and how Adobe inject
 
 ## Current behavior in this app
 
-- **Sign in**: Uses Adobe IMS OAuth (same as AEM author). Redirects to IMS authorize, then callback exchanges the code for tokens and userinfo and sets a session cookie.
+- **Sign in**: Uses Adobe IMS OAuth (same as AEM author). Redirects to IMS authorize, then callback exchanges the code for tokens and userinfo and sets a session cookie. When Microsoft Entra is configured, it is preferred over Adobe (see [microsoft-entra-authentication.md](microsoft-entra-authentication.md)).
 - **Session**: Stored in an HTTP-only signed cookie (`lib/auth/session.js`). Includes user (name, email, sub, account_type) and tokens (access_token, refresh_token, expires_at) for optional API use.
 - **Sign out**: POST or GET `/api/auth/signout` clears the session cookie.
