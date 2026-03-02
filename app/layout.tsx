@@ -29,6 +29,7 @@ export default function RootLayout({
         <script
           type="application/vnd.adobe.aue.filter+json"
           src="/filter-definition.json"
+          suppressHydrationWarning
         />
       </head>
       <body suppressHydrationWarning>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { getAdobeClientId } from "@/lib/auth/config";
 
 const IMS_AUTHORIZE_URL = "https://ims-na1.adobelogin.com/ims/authorize/v2";
@@ -122,7 +123,9 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut, authenticated: e
     setError(null);
     setLoading(true);
     if (!clientId) {
-      setError("Adobe Client ID not configured. Add NEXT_PUBLIC_ADOBE_CLIENT_ID to .env or run: node scripts/generate-runtime-config.cjs");
+      const msg = "Add NEXT_PUBLIC_ADOBE_CLIENT_ID to .env or run: node scripts/generate-runtime-config.cjs";
+      setError(msg);
+      toast.error("Sign-in not configured", { description: msg });
       setLoading(false);
       return;
     }
@@ -258,7 +261,7 @@ export function AdobeSignInButton({ onAuthenticated, onSignOut, authenticated: e
       <button
         type="button"
         onClick={isAuthenticated ? handleSignOut : handleSignIn}
-        disabled={loading || !clientId}
+        disabled={loading}
         className={isAuthenticated ? "hover:underline text-sm" : "hover:underline"}
         style={{ opacity: loading ? 0.7 : 1 }}
       >
