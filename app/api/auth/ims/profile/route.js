@@ -26,5 +26,7 @@ export async function GET(request) {
     email: data.email,
     sub: data.sub,
     account_type: data.account_type,
+    picture: data.picture,
+    avatar: data.avatar,
   });
 }

@@ -69,7 +69,13 @@ export function AuthProvider({ children }) {
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return { name: data.name, email: data.email, sub: data.sub };
+    return {
+      name: data.name,
+      email: data.email,
+      sub: data.sub,
+      picture: data.picture,
+      avatar: data.avatar,
+    };
   }, []);
 
   const handleImsAuthenticated = useCallback(
